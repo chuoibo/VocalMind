@@ -1,0 +1,20 @@
+speech2txt:
+  output_file_path: /speech/common_dir/speech/output/output_speech.txt
+  model_name: facebook/wav2vec2-base-960h
+  model_cache: /speech/common_dir/speech/model/voice
+  post_processing_model_cache: /speech/common_dir/speech/model/post_process
+  post_processing_task: text2text-generation
+  max_len_chunk: 2048
+  pre_processing_multiplier: 1.2
+  sampling_rate: 16000
+  # audio_file_path: /speech/common_dir/speech/output/output_record.npy
+  # pause_markers_file_path: /speech/common_dir/speech/output/pause_markers.json
+  vad_mode: 2
+  silence_limit_seconds : 3
+  rate : 16000  
+  frame_duration : 30
+  min_pause: 0.5
+  max_pause: 2
+
+txt2speech:
+  output_file_path: /speech/common_dir/speech/output/txt_2_speech_output.wav

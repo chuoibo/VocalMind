@@ -1,0 +1,11 @@
+celery==5.3.4
+redis==5.0.0
+pydantic==1.10.12
+python-dotenv==1.0.0
+transformers==4.33.3
+librosa==0.10.0
+webrtcvad-wheels
+realtimetts[gtts]==0.4.7
+onnx==1.14.1
+onnxruntime-gpu==1.18.0
+resampy==0.4.2

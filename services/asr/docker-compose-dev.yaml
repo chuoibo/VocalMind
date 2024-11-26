@@ -1,0 +1,61 @@
+services:  
+  asr:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: asr
+    command: sh -c "celery -A celery_tasks.tasks worker -Q txt2speech_queue,speech2txt_queue -n worker.asr --loglevel=info --concurrency=1 -E --logfile=/asr/logs/celery.log"
+    environment:
+      - MQ_URL=${MQ_URL}
+      - REDIS_URL=${REDIS_URL}
+      - RMQ_USER=${RMQ_USER}
+      - RMQ_PWD=${RMQ_PWD}
+      - REDIS_PWD=${REDIS_PWD}
+      - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
+    volumes:
+      - ./src:/asr/src
+      - ./logs:/asr/logs
+      - ../common_dir:/asr/common_dir
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
+    networks:
+      - vnet
+    devices:
+      - /dev/snd:/dev/snd 
+    privileged: true
+  
+  rabbitmq:
+    image: rabbitmq:3.12.13
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RMQ_PWD}
+    networks:
+      - vnet
+  
+  redis:
+    image: redis:7.2-rc-bullseye
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PWD}
+    ports:
+      - 6379:6379
+    networks:
+      - vnet
+
+  flower:
+    image: mher/flower:2.0
+    environment:
+      CELERY_BROKER_URL: ${MQ_URL}
+      FLOWER_PORT: 5555
+    ports:
+      - 5555:5555
+    networks:
+      - vnet
+    depends_on:
+      - rabbitmq
+
+networks:
+  vnet:
+    name: speech_vnet
