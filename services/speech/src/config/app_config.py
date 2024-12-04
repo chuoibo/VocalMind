@@ -67,6 +67,17 @@ class EmotionAnalysisConfig(Config):
     max_length = emotion_analysis_cfg['max_length']
 
 
+class LLMConfig(Config):
+    config = Config.load_config()
+    llm_cfg = config['llm']
+
+    model_cache = llm_cfg['model_cache']
+    return_tensors = llm_cfg['return_tensors']
+    max_new_tokens = llm_cfg['max_new_tokens']
+    temperature = llm_cfg['temperature']
+    repetition_penalty = llm_cfg['repetition_penalty']
+
+
 class Txt2SpeechConfig(Config):
     config = Config.load_config()
     txt2speech_cfg = config['txt2speech']

@@ -14,22 +14,13 @@ from src.module.record.record_speech import Record
 from src.module.processing.text_processing import TextProcessing
 from src.module.processing.record_processing import RecordProcessing
 
-
-from services.speech.src.schema.speech_system_schema import (InputSpeech2TxtModel, 
-                                          OutputSpeech2TxtModel,
-                                          ResultSpeech2TxtModel, 
-                                          StatusEnum, 
-                                          StatusModel)
-
 SPEECH_2_TXT_MODEL = None
 SPEECH_2_TXT_MODEL_FLAG = None
 SPEECH_2_TXT_PROCESSOR = None
 
 class Speech2TxtRecognition:
-    def __init__(self, inp: InputSpeech2TxtModel):
+    def __init__(self):
         global SPEECH_2_TXT_MODEL, SPEECH_2_TXT_PROCESSOR, SPEECH_2_TXT_MODEL_FLAG
-
-        self.live_record = inp.live_record
 
         self.model_name = sc.model_name
         self.model_cache = sc.model_cache
@@ -108,8 +99,8 @@ class Speech2TxtRecognition:
         return word_timings
 
 
-    def run(self) -> OutputSpeech2TxtModel:
-        if self.live_record:
+    def run(self, live_record):
+        if live_record:
             record_voice, pause_markers = Record().record_audio()
     
         record_process = RecordProcessing(pause_markers=pause_markers)
@@ -156,18 +147,8 @@ class Speech2TxtRecognition:
         logging.info('Starting post processing generated text ...')
         postprocessing = TextProcessing()
         processed_generated_speech = postprocessing.text_post_processing(generated_text_with_punctuations)
-
-        generated_text_file = write_to_txt_file(text=processed_generated_speech, file_path=self.output_file_path)
-
-        result = ResultSpeech2TxtModel(
-            generated_text_file=generated_text_file
-            )
         
-        status = StatusModel(status=StatusEnum.success, message="Processing completed successfully")
         logging.info('Finish speech to text recognition module ...')
 
-        return OutputSpeech2TxtModel(
-            result=result,
-            status=status
-        )
+        return processed_generated_speech
         

@@ -16,21 +16,13 @@ from f5_tts.model import DiT
 
 from src.config.app_config import Txt2SpeechConfig as tc
 from src.utils.common import load_text_file, make_directory
-from src.schema.text2speech_schema import (InputTxt2SpeechModel,
-                                           OutputTxt2SpeechModel,
-                                           ResultTxt2SpeechModel,
-                                           StatusEnum,
-                                           StatusModel)
 
 F5_VOCODER = None
 F5_TTS_MODEL = None
 
 class Txt2SpeechRecognition:
-    def __init__(self, inp: InputTxt2SpeechModel):
+    def __init__(self):
         global F5_VOCODER, F5_TTS_MODEL
-
-        self.input_file_path = inp.input_file_path
-        self.emotion = inp.emotion
 
         make_directory(path=tc.output_dir)
         self.wave_path = Path(tc.output_dir) / tc.output_file
@@ -88,8 +80,8 @@ class Txt2SpeechRecognition:
         return self.ref_audio, self.ref_text
     
 
-    def main_process(self, text_gen):
-        self.ref_audio, self.ref_text = self.mapping_emotion_analysis(emotion=self.emotion)
+    def run(self, text_gen, emotion):
+        self.ref_audio, self.ref_text = self.mapping_emotion_analysis(emotion=emotion)
         
         main_voice = {"ref_audio": self.ref_audio, "ref_text": self.ref_text}
         voices = {"main": main_voice}
@@ -141,22 +133,3 @@ class Txt2SpeechRecognition:
                     remove_silence_for_generated_wav(f.name)
 
         return self.wave_path
-
-
-    def run(self) -> OutputTxt2SpeechModel:
-        input_text = load_text_file(self.input_file_path)
-        logging.info('Loading input file path')
-
-        self.wave_path = self.main_process(text_gen=input_text)
-
-        result = ResultTxt2SpeechModel(
-            output_file_path=self.wave_path
-        )
-
-        status = StatusModel(status=StatusEnum.success, message="Processing completed successfully")
-        logging.info('Finish text to speech recognition module ...')
-
-        return OutputTxt2SpeechModel(
-            result=result,
-            status=status
-        )

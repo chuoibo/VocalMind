@@ -49,3 +49,11 @@ txt2speech:
   vocoder_name: vocos
   vocoder_local_path: /speech/common_dir/speech/model/vocos-mel-24khz
   load_vocoder_from_local: True
+
+
+llm:
+  model_cache: /llm/common_dir/llm/model/explain
+  return_tensors: pt
+  max_new_tokens: 50
+  temperature: 0.1
+  repetition_penalty: 1.2
