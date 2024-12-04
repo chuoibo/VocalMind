@@ -14,6 +14,7 @@ speech2txt:
   min_pause: 0.5
   max_pause: 2
 
+
 emotion_analysis:
   model_name: facebook/wav2vec2-base-960h
   model_cache: facebook/wav2vec2-base-960h
@@ -22,5 +23,29 @@ emotion_analysis:
   return_tensors: np
   max_length: 128
 
+
+DiT_cfg:
+  dim: 1024
+  depth: 22
+  heads: 16
+  ff_mult: 2
+  text_dim: 512
+  conv_layers: 4
+
+
+ff5_tts_custom:
+  ref_audio_neutral: src/test/basic_ref_en.wav
+  ref_text_neutral: Some call me nature, others call me mother nature.
+
+
 txt2speech:
-  output_file_path: /speech/common_dir/speech/output/txt_2_speech_output.wav
+  remove_silence: False
+  output_dir: /speech/common_dir/speech/output/
+  output_file: infer_cli_out.wav
+  model_name: F5-TTS
+  ckpt_file: /speech/common_dir/speech/model/model_1200000.safetensors
+  vocab_file: /speech/common_dir/speech/files/vocab.txt
+  speed: 1.0
+  vocoder_name: vocos
+  vocoder_local_path: /speech/common_dir/speech/model/vocos-mel-24khz
+  load_vocoder_from_local: True

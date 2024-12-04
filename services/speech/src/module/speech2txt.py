@@ -15,7 +15,7 @@ from src.module.processing.text_processing import TextProcessing
 from src.module.processing.record_processing import RecordProcessing
 
 
-from src.schema.speech2txt_schema import (InputSpeech2TxtModel, 
+from services.speech.src.schema.speech_system_schema import (InputSpeech2TxtModel, 
                                           OutputSpeech2TxtModel,
                                           ResultSpeech2TxtModel, 
                                           StatusEnum, 
