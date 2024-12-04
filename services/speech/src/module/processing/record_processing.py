@@ -2,16 +2,15 @@ import numpy as np
 
 import logging
 
-from config.app_config import (Speech2TxtConfig as sc, 
-                               RecordConfig as rc)
+from src.config.app_config import (Speech2TxtConfig as sc)
 
 
 class RecordProcessing:
     def __init__(self, pause_markers: dict):
         self.pause_markers = pause_markers
         self.pre_processing_multiplier = sc.pre_processing_multiplier
-        self.frame_duration = rc.frame_duration
-        self.frame_rate = rc.rate
+        self.frame_duration = sc.frame_duration
+        self.frame_rate = sc.rate
         self.frame_size = (self.frame_rate * self.frame_duration) / 1000
         logging.info('Initialize pre-processing module')
     

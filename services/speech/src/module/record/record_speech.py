@@ -1,10 +1,12 @@
 import numpy as np
+import logging
 import webrtcvad
 import pyaudio
 import time
 
-from config.app_config import Speech2TxtConfig as sc
-import logging
+from src.config.app_config import Speech2TxtConfig as sc
+
+
 class Record:
     def __init__(self):
         self.vad_mode = sc.vad_mode
