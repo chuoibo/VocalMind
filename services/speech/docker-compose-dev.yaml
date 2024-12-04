@@ -1,10 +1,10 @@
 services:  
-  asr:
+  speech:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: asr
-    command: sh -c "celery -A celery_tasks.tasks worker -Q txt2speech_queue,speech2txt_queue -n worker.asr --loglevel=info --concurrency=1 -E --logfile=/asr/logs/celery.log"
+    container_name: speech
+    command: sh -c "celery -A src.celery_tasks.tasks worker -Q txt2speech_queue,speech2txt_queue -n worker.speech --loglevel=info --concurrency=1 -E --logfile=/speech/logs/celery.log"
     environment:
       - MQ_URL=${MQ_URL}
       - REDIS_URL=${REDIS_URL}
@@ -13,9 +13,9 @@ services:
       - REDIS_PWD=${REDIS_PWD}
       - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
     volumes:
-      - ./src:/asr/src
-      - ./logs:/asr/logs
-      - ../common_dir:/asr/common_dir
+      - ./src:/speech/src
+      - ./logs:/speech/logs
+      - ../common_dir:/speech/common_dir
       - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
       - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
     networks:

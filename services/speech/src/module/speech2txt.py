@@ -7,19 +7,19 @@ import onnxruntime as ort
 from itertools import groupby
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 
-from utils.common import *
-from config.app_config import Speech2TxtConfig as sc
+from src.utils.common import *
+from src.config.app_config import Speech2TxtConfig as sc
 
-from module.record.record_speech import Record
-from module.preprocessing.text_processing import TextProcessing
-from module.preprocessing.record_processing import RecordProcessing
+from src.module.record.record_speech import Record
+from src.module.processing.text_processing import TextProcessing
+from src.module.processing.record_processing import RecordProcessing
 
 
-from schema.speech2txt_schema import (InputSpeech2TxtModel, 
-                                      OutputSpeech2TxtModel, 
-                                      ResultSpeech2TxtModel, 
-                                      StatusEnum, 
-                                      StatusModel)
+from src.schema.speech2txt_schema import (InputSpeech2TxtModel, 
+                                          OutputSpeech2TxtModel,
+                                          ResultSpeech2TxtModel, 
+                                          StatusEnum, 
+                                          StatusModel)
 
 SPEECH_2_TXT_MODEL = None
 SPEECH_2_TXT_MODEL_FLAG = None
@@ -30,6 +30,9 @@ class Speech2TxtRecognition:
         global SPEECH_2_TXT_MODEL, SPEECH_2_TXT_PROCESSOR, SPEECH_2_TXT_MODEL_FLAG
 
         self.live_record = inp.live_record
+
+        self.model_name = sc.model_name
+        self.model_cache = sc.model_cache
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -44,8 +47,8 @@ class Speech2TxtRecognition:
             else:
                 SPEECH_2_TXT_MODEL_FLAG = 'hf'
                 SPEECH_2_TXT_MODEL = Wav2Vec2ForCTC.from_pretrained(
-                    pretrained_model_name_or_path=self.sc.model_name,
-                    cache_dir=self.sc.model_cache
+                    pretrained_model_name_or_path=self.model_name,
+                    cache_dir=self.model_cache
                 ).to(self.device)
                 logging.info('Loaded pretrained Hugging Face model for the first time.')
 

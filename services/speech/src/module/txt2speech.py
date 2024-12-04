@@ -2,14 +2,14 @@ import logging
 
 from RealtimeTTS import TextToAudioStream, GTTSEngine
 
-from config.app_config import Txt2SpeechConfig as tc
-from utils.common import load_text_file
-from module.preprocessing.text_processing import TextProcessing
-from schema.text2speech_schema import (InputTxt2SpeechModel,
-                                      OutputTxt2SpeechModel,
-                                      ResultTxt2SpeechModel,
-                                      StatusEnum,
-                                      StatusModel)
+from src.config.app_config import Txt2SpeechConfig as tc
+from src.utils.common import load_text_file
+from src.module.processing.text_processing import TextProcessing
+from src.schema.text2speech_schema import (InputTxt2SpeechModel,
+                                           OutputTxt2SpeechModel,
+                                           ResultTxt2SpeechModel,
+                                           StatusEnum,
+                                           StatusModel)
 
 
 class Txt2SpeechRecognition:

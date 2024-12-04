@@ -10,22 +10,22 @@ RUN useradd -ms /bin/bash celery_user
 
 COPY requirements.txt /tmp/requirements.txt
 
-WORKDIR /asr
+WORKDIR /speech
 
 ENV CUDA_DOCKER_ARCH=all
 
-RUN mkdir -p /asr/logs
+RUN mkdir -p /speech/logs
 
-WORKDIR /asr/src
+WORKDIR /speech/src
 
-COPY ./src /asr/src
+COPY ./src /speech/src
 
 # RUN modprobe snd-aloop
 RUN apt-get update && apt-get install -y build-essential portaudio19-dev pulseaudio
 RUN pip install pyaudio ffmpeg
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-RUN chown -R celery_user:celery_user /asr
+RUN chown -R celery_user:celery_user /speech
 
 USER celery_user
 

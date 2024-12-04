@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from utils.common import read_yaml_file
+from src.utils.common import read_yaml_file
 
 load_dotenv()
 
@@ -46,8 +46,6 @@ class Speech2TxtConfig(Config):
     sampling_rate = speech2txt_cfg['sampling_rate']
 
     #For recording
-    # audio_file_path = speech2txt_cfg['audio_file_path']
-    # pause_markers_file_path = speech2txt_cfg['pause_markers_file_path']
     vad_mode = speech2txt_cfg['vad_mode']
     silence_limit_seconds = speech2txt_cfg['silence_limit_seconds']
     rate = speech2txt_cfg['rate']
@@ -55,6 +53,17 @@ class Speech2TxtConfig(Config):
     min_pause = speech2txt_cfg['min_pause']
     max_pause = speech2txt_cfg['max_pause']
     
+
+class EmotionAnalysisConfig(Config):
+    config = Config.load_config()
+    emotion_analysis_cfg = config['emotion_analysis']
+
+    model_name = emotion_analysis_cfg['model_name']
+    model_cache = emotion_analysis_cfg['model_cache']
+    padding = emotion_analysis_cfg['padding']
+    truncation = emotion_analysis_cfg['truncation']
+    return_tensors = emotion_analysis_cfg['return_tensors']
+    max_length = emotion_analysis_cfg['max_length']
 
 
 class Txt2SpeechConfig(Config):

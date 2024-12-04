@@ -6,7 +6,7 @@ import logging
 from transformers import pipeline
 from concurrent.futures import ThreadPoolExecutor
 
-from config.app_config import Speech2TxtConfig as sc
+from src.config.app_config import Speech2TxtConfig as sc
 
 POST_PROCESSING_GLOBAL_MODEL = None
 

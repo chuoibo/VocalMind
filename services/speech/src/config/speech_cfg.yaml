@@ -7,14 +7,20 @@ speech2txt:
   max_len_chunk: 2048
   pre_processing_multiplier: 1.2
   sampling_rate: 16000
-  # audio_file_path: /speech/common_dir/speech/output/output_record.npy
-  # pause_markers_file_path: /speech/common_dir/speech/output/pause_markers.json
   vad_mode: 2
   silence_limit_seconds : 3
   rate : 16000  
   frame_duration : 30
   min_pause: 0.5
   max_pause: 2
+
+emotion_analysis:
+  model_name: facebook/wav2vec2-base-960h
+  model_cache: facebook/wav2vec2-base-960h
+  padding: True
+  truncation: True
+  return_tensors: np
+  max_length: 128
 
 txt2speech:
   output_file_path: /speech/common_dir/speech/output/txt_2_speech_output.wav
