@@ -9,8 +9,7 @@ app = Celery(
 )
 
 app.conf.task_routes = {
-    'txt2speech': {'queue': 'txt2speech_queue'},
-    'speech2txt': {'queue': 'speech2txt_queue'}
+    'speech_ai': {'queue': 'speech_ai_queue'}
 }
 
 app.conf.update(

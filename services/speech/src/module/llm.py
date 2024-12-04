@@ -59,7 +59,7 @@ class TextGeneration:
         return final_text.strip()
 
 
-    def process(self, input_text):
+    def run(self, input_text):
         logging.info('Starting explain inference process')
 
         self.model.to(self.device)

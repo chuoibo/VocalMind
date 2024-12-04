@@ -18,7 +18,7 @@ SPEECH_2_TXT_MODEL = None
 SPEECH_2_TXT_MODEL_FLAG = None
 SPEECH_2_TXT_PROCESSOR = None
 
-class Speech2TxtRecognition:
+class Speech2Txt:
     def __init__(self):
         global SPEECH_2_TXT_MODEL, SPEECH_2_TXT_PROCESSOR, SPEECH_2_TXT_MODEL_FLAG
 
