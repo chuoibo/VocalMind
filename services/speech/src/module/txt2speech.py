@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 from pathlib import Path
 import numpy as np
@@ -15,12 +14,12 @@ from f5_tts.infer.utils_infer import (
 from f5_tts.model import DiT
 
 from src.config.app_config import Txt2SpeechConfig as tc
-from src.utils.common import load_text_file, make_directory
+from src.utils.common import  make_directory
 
 F5_VOCODER = None
 F5_TTS_MODEL = None
 
-class Txt2SpeechRecognition:
+class Txt2Speech:
     def __init__(self):
         global F5_VOCODER, F5_TTS_MODEL
 

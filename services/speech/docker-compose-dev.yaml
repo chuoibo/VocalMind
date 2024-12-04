@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: speech
-    command: sh -c "celery -A src.celery_tasks.tasks worker -Q txt2speech_queue,speech2txt_queue -n worker.speech --loglevel=info --concurrency=1 -E --logfile=/speech/logs/celery.log"
+    command: sh -c "celery -A src.celery_tasks.tasks worker -Q speech_ai_queue -n worker.speech --loglevel=info --concurrency=1 -E --logfile=/speech/logs/celery.log"
     environment:
       - MQ_URL=${MQ_URL}
       - REDIS_URL=${REDIS_URL}

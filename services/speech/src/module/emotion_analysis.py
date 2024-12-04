@@ -59,7 +59,7 @@ class EmotionAnalysis:
         return result
     
 
-    def analyze_emotion(self, input_text):
+    def run(self, input_text):
         if self.model_type == 'hf':
             start_time = time.time()
             result = self.model(input_text)[0]['label']
