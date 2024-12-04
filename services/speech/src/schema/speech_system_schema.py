@@ -10,7 +10,7 @@ class InputSpeech2TxtModel(BaseModel):
     live_record: bool
 
 class ResultSpeech2TxtModel(BaseModel):
-    generated_text_file: StrictStr
+    generated_audio_file: StrictStr
 
 class StatusModel(BaseModel):
     status: StatusEnum

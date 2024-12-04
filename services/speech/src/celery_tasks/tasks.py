@@ -1,6 +1,6 @@
 import logging
 
-from schema.speech2txt_schema import InputSpeech2TxtModel
+from services.speech.src.schema.speech_system_schema import InputSpeech2TxtModel
 from schema.text2speech_schema import InputTxt2SpeechModel
 
 from module.speech2txt import Speech2TxtRecognition

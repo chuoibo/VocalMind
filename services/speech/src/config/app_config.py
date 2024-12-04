@@ -26,6 +26,7 @@ class Config:
 
     SPEECH_CONFIG_FILEPATH = '/asr/src/config/speech_cfg.yaml'
 
+
     @classmethod
     def load_config(cls):
         return read_yaml_file(cls.SPEECH_CONFIG_FILEPATH)
@@ -66,8 +67,44 @@ class EmotionAnalysisConfig(Config):
     max_length = emotion_analysis_cfg['max_length']
 
 
+class LLMConfig(Config):
+    config = Config.load_config()
+    llm_cfg = config['llm']
+
+    model_cache = llm_cfg['model_cache']
+    return_tensors = llm_cfg['return_tensors']
+    max_new_tokens = llm_cfg['max_new_tokens']
+    temperature = llm_cfg['temperature']
+    repetition_penalty = llm_cfg['repetition_penalty']
+
+
 class Txt2SpeechConfig(Config):
     config = Config.load_config()
     txt2speech_cfg = config['txt2speech']
+    ff5_tts_custom_cfg = config['ff5_tts_custom']
+    DiT_cfg = config['DiT_cfg']
 
-    output_file_path = txt2speech_cfg['output_file_path']
+    remove_silence = txt2speech_cfg['remove_silence']
+    output_dir = txt2speech_cfg['output_dir']
+    output_file = txt2speech_cfg['output_file']
+    model_name = txt2speech_cfg['model_name']
+    ckpt_file = txt2speech_cfg['ckpt_file']
+    vocab_file = txt2speech_cfg['vocab_file']
+    speed = txt2speech_cfg['speed']
+    vocoder_name = txt2speech_cfg['vocoder_name']
+    vocoder_local_path = txt2speech_cfg['vocoder_local_path']
+    load_vocoder_from_local = txt2speech_cfg['load_vocoder_from_local']
+    
+    #Config for ff5_tts
+    ref_audio_neutral = txt2speech_cfg['ref_audio_neutral']
+    ref_text_neutral = txt2speech_cfg['ref_text_neutral']
+    ref_audio_sad = txt2speech_cfg['ref_audio_sad']
+    ref_text_sad = txt2speech_cfg['ref_text_sad']
+
+    #Config for DiT model
+    dim = DiT_cfg['dim']
+    depth = DiT_cfg['depth']
+    heads = DiT_cfg['heads']
+    ff_mult = DiT_cfg['ff_mult']
+    text_dim = DiT_cfg['text_dim']
+    conv_layers = DiT_cfg['conv_layers']

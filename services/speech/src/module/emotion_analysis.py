@@ -8,6 +8,7 @@ from transformers import pipeline, AutoTokenizer
 
 from src.utils.common import *
 from src.config.app_config import EmotionAnalysisConfig as ec
+from src.config.app_config import Txt2SpeechConfig as tc
 
 EMOTION_ANALYSIS_MODEL = None
 EMOTION_ANALYSIS_MODEL_FLAG = None
@@ -61,7 +62,7 @@ class EmotionAnalysis:
     def analyze_emotion(self, input_text):
         if self.model_type == 'hf':
             start_time = time.time()
-            result = self.classifier(input_text)[0]['label']
+            result = self.model(input_text)[0]['label']
             end_time = time.time()
 
         elif self.model_type == 'onnx':
@@ -92,3 +93,4 @@ class EmotionAnalysis:
         logging.info(f'Finish inference module emotion analysis in {end_time-start_time}')
 
         return final_result
+    
