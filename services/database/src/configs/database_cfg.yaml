@@ -1,0 +1,7 @@
+speech_database: 
+  hostname: database
+  port: 27017
+  user: speech_db_user
+  password: speech_db_pass
+  database_name: speech_database
+  collection_name: speech
