@@ -42,7 +42,6 @@ class SpeechSystem:
 
     
     def run(self) -> OutputSpeechSystemModel:
-        pass
         speech_recognition = self.load_speech2txt().run(self.live_record)
 
         with ThreadPoolExecutor() as executor:
