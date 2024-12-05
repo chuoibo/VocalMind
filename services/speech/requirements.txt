@@ -1,8 +1,8 @@
 celery==5.3.4
 redis==5.0.0
-pydantic==1.10.12
+pydantic==2.9.2
 python-dotenv==1.0.0
-transformers==4.33.3
+transformers==4.46.2
 librosa==0.10.0
 webrtcvad-wheels
 onnx==1.14.1

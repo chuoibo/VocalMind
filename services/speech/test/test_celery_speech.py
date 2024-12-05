@@ -20,7 +20,7 @@ app = Celery(
 )
 
 def test_celery_task(input_data):
-    result = app.send_task(name='record_speech', queue='record_speech_queue', args=[input_data])
+    result = app.send_task(name='speech_ai', queue='speech_ai_queue', args=[input_data])
     task_result = AsyncResult(result.id)
 
     while not task_result.ready():

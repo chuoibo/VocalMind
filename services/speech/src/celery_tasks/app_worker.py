@@ -1,6 +1,7 @@
 from celery import Celery
 
-from config.app_config import Config
+from src.config.app_config import Config
+
 
 app = Celery(
     'speech',
@@ -9,7 +10,7 @@ app = Celery(
 )
 
 app.conf.task_routes = {
-    'speech_ai': {'queue': 'speech_ai_queue'}
+    'speech_ai': {'queue': 'record_speech_queue'}
 }
 
 app.conf.update(

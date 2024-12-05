@@ -32,7 +32,7 @@ class EmotionAnalysis:
             onnx_file = find_files(directory_path=ec.model_cache, type_file='onnx')
             if onnx_file:
                 EMOTION_ANALYSIS_MODEL_FLAG = 'onnx'
-                EMOTION_ANALYSIS_MODEL = ort.InferenceSession(onnx_file[0], providers=['CUDAExecutionProvider'])
+                EMOTION_ANALYSIS_MODEL = ort.InferenceSession(onnx_file[0], providers=['CPUExecutionProvider'])
                 logging.info('Loading ONNX model for the first time.')
             else:
                 EMOTION_ANALYSIS_MODEL_FLAG = 'hf'

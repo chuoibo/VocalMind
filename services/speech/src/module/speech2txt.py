@@ -27,7 +27,8 @@ class Speech2Txt:
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        make_directory(sc.model_cache)
+        if not os.path.exists(sc.model_cache):
+            make_directory(sc.model_cache)
 
         if SPEECH_2_TXT_MODEL is None:
             onnx_file = find_files(directory_path=sc.model_cache, type_file='onnx')
@@ -151,4 +152,6 @@ class Speech2Txt:
         logging.info('Finish speech to text recognition module ...')
 
         return processed_generated_speech
-        
+
+if __name__ == '__main__':
+    torch.multiprocessing.set_start_method('spawn')

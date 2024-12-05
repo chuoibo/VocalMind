@@ -10,6 +10,7 @@ from src.config.app_config import LLMConfig as lc
 TEXT_GENERATION_MODEL = None
 TEXT_GENERATION_TOKENIZER = None
 
+
 class TextGeneration:
     def __init__(self):
         global TEXT_GENERATION_MODEL, TEXT_GENERATION_TOKENIZER
@@ -21,7 +22,7 @@ class TextGeneration:
             TEXT_GENERATION_TOKENIZER = PreTrainedTokenizerFast.from_pretrained(lc.model_cache)
         
         self.tokenizer = TEXT_GENERATION_TOKENIZER
-        logging.info('Initialize explain tokenizer')
+        logging.info('Initialize text generation tokenizer')
 
         if TEXT_GENERATION_MODEL is None:
             logging.info('Loading the text generation model if it is the first time ...')
@@ -60,7 +61,7 @@ class TextGeneration:
 
 
     def run(self, input_text):
-        logging.info('Starting explain inference process')
+        logging.info('Starting text generation inference process')
 
         self.model.to(self.device)
 

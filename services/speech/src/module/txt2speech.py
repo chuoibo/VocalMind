@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from pathlib import Path
 import numpy as np
@@ -23,7 +24,9 @@ class Txt2Speech:
     def __init__(self):
         global F5_VOCODER, F5_TTS_MODEL
 
-        make_directory(path=tc.output_dir)
+        if not os.path.exists(tc.output_dir):
+            make_directory(path=tc.output_dir)
+            
         self.wave_path = Path(tc.output_dir) / tc.output_file
         self.model_name = tc.model_name
         self.ckpt_file = tc.ckpt_file
