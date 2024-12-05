@@ -1,6 +1,6 @@
 import logging
 
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
 from src.module.llm import TextGeneration
 from src.module.emotion_analysis import EmotionAnalysis
@@ -44,12 +44,16 @@ class SpeechSystem:
     def run(self) -> OutputSpeechSystemModel:
         speech_recognition = self.load_speech2txt().run(self.live_record)
 
-        with ThreadPoolExecutor() as executor:
-            emotion_future = executor.submit(self.load_emotion_analysis().run, speech_recognition)
-            text_generation_future = executor.submit(self.load_text_gen().run, speech_recognition)
+        emotion_analysis = self.load_emotion_analysis().run(speech_recognition)
 
-            emotion_analysis = emotion_future.result()
-            text_generation = text_generation_future.result()
+        text_generation = self.load_text_gen().run(speech_recognition)
+
+        # with ThreadPoolExecutor() as executor:
+            # emotion_future = executor.submit(self.load_emotion_analysis().run, speech_recognition)
+            # text_generation_future = executor.submit(self.load_text_gen().run, speech_recognition)
+
+            # emotion_analysis = emotion_future.result()
+            # text_generation = text_generation_future.result()
 
 
         generated_speech = self.load_txt2speech().run(text_generation, emotion_analysis)
