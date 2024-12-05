@@ -1,13 +1,12 @@
 speech2txt:
-  output_file_path: /speech/common_dir/speech/output/output_speech.txt
   model_name: facebook/wav2vec2-base-960h
-  model_cache: /speech/common_dir/speech/model/voice
-  post_processing_model_cache: /speech/common_dir/speech/model/post_process
+  model_cache: /speech/common_dir/speech2txt
+  post_processing_model_cache: /speech/common_dir/text_processing
   post_processing_task: text2text-generation
   max_len_chunk: 2048
   pre_processing_multiplier: 1.2
   sampling_rate: 16000
-  vad_mode: 2
+  vad_mode: 3
   silence_limit_seconds : 3
   rate : 16000  
   frame_duration : 30
@@ -16,8 +15,8 @@ speech2txt:
 
 
 emotion_analysis:
-  model_name: facebook/wav2vec2-base-960h
-  model_cache: facebook/wav2vec2-base-960h
+  model_name: text-classification
+  model_cache: /speech/common_dir/emotion
   padding: True
   truncation: True
   return_tensors: np
@@ -34,25 +33,25 @@ DiT_cfg:
 
 
 ff5_tts_custom:
-  ref_audio_neutral: src/test/basic_ref_en.wav
+  ref_audio_neutral: /speech/common_dir/txt2speech/ref/basic_ref_en.wav
   ref_text_neutral: Some call me nature, others call me mother nature.
 
 
 txt2speech:
   remove_silence: False
-  output_dir: /speech/common_dir/speech/output/
+  output_dir: /speech/common_dir/output/
   output_file: infer_cli_out.wav
   model_name: F5-TTS
-  ckpt_file: /speech/common_dir/speech/model/model_1200000.safetensors
-  vocab_file: /speech/common_dir/speech/files/vocab.txt
+  ckpt_file: /speech/common_dir/txt2speech/checkpoints/model_1200000.safetensors
+  vocab_file: /speech/common_dir/txt2speech/ref/vocab.txt
   speed: 1.0
   vocoder_name: vocos
-  vocoder_local_path: /speech/common_dir/speech/model/vocos-mel-24khz
+  vocoder_local_path: /speech/common_dir/txt2speech/ref/vocos-mel-24khz
   load_vocoder_from_local: True
 
 
 llm:
-  model_cache: /llm/common_dir/llm/model/explain
+  model_cache: /speech/common_dir/text_gen
   return_tensors: pt
   max_new_tokens: 50
   temperature: 0.1

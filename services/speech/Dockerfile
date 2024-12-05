@@ -16,12 +16,10 @@ ENV CUDA_DOCKER_ARCH=all
 
 RUN mkdir -p /speech/logs
 
-WORKDIR /speech/src
-
 COPY ./src /speech/src
 
 # RUN modprobe snd-aloop
-RUN apt-get update && apt-get install -y build-essential portaudio19-dev pulseaudio
+RUN apt-get update && apt-get install -y build-essential portaudio19-dev pulseaudio git
 RUN pip install pyaudio ffmpeg
 RUN pip install git+https://github.com/SWivid/F5-TTS.git
 RUN pip install --no-cache-dir -r /tmp/requirements.txt

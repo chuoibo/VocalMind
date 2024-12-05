@@ -12,31 +12,48 @@ from src.schema.speech_system_schema import (InputSpeechSystemModel,
                                              StatusModel,
                                              StatusEnum)
 
-
 class SpeechSystem:
     def __init__(self, inp: InputSpeechSystemModel):
         self.live_record = inp.live_record
+        self.text_generation = None
+        self.emotion_analysis = None
+        self.speech_to_text = None
+        self.text_to_speech = None
 
-        self.text_generation = TextGeneration()
-        self.emotion_analysis = EmotionAnalysis()
-        self.speech_to_text = Speech2Txt()
-        self.text_to_speech = Txt2Speech()
+    def load_text_gen(self):
+        if not self.text_generation:
+            self.text_generation = TextGeneration()
+        return self.text_generation
 
-        logging.info('Initialize speech pipeline ...')
+    def load_emotion_analysis(self):
+        if not self.emotion_analysis:
+            self.emotion_analysis = EmotionAnalysis()
+        return self.emotion_analysis
+
+    def load_speech2txt(self):
+        if not self.speech_to_text:
+            self.speech_to_text = Speech2Txt()
+        return self.speech_to_text
+
+    def load_txt2speech(self):
+        if not self.text_to_speech:
+            self.text_to_speech = Txt2Speech()
+        return self.text_to_speech
 
     
     def run(self) -> OutputSpeechSystemModel:
-        speech_recognition = self.speech_to_text.run(self.live_record)
+        pass
+        speech_recognition = self.load_speech2txt().run(self.live_record)
 
         with ThreadPoolExecutor() as executor:
-            emotion_future = executor.submit(self.emotion_analysis.run, speech_recognition)
-            text_generation_future = executor.submit(self.text_generation.run, speech_recognition)
+            emotion_future = executor.submit(self.load_emotion_analysis().run, speech_recognition)
+            text_generation_future = executor.submit(self.load_text_gen().run, speech_recognition)
 
             emotion_analysis = emotion_future.result()
             text_generation = text_generation_future.result()
 
 
-        generated_speech = self.text_to_speech.run(text_generation, emotion_analysis)
+        generated_speech = self.load_txt2speech().run(text_generation, emotion_analysis)
 
         result = ResultSpeechSystemModel(
             generated_audio_file=generated_speech
@@ -49,4 +66,3 @@ class SpeechSystem:
             result=result,
             status=status
         )
-

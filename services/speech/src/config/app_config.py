@@ -24,7 +24,7 @@ class Config:
     LOG_FILEPATH = os.path.join(LOG_DIR,"celery.log")
     COMMON_DIR = "/common_dir"
 
-    SPEECH_CONFIG_FILEPATH = '/asr/src/config/speech_cfg.yaml'
+    SPEECH_CONFIG_FILEPATH = '/speech/src/config/speech_cfg.yaml'
 
 
     @classmethod
@@ -37,7 +37,6 @@ class Speech2TxtConfig(Config):
     speech2txt_cfg = config['speech2txt']
 
     #For asr
-    output_file_path = speech2txt_cfg['output_file_path']
     model_name = speech2txt_cfg['model_name']
     model_cache= speech2txt_cfg['model_cache']
     post_processing_task = speech2txt_cfg['post_processing_task']
@@ -94,12 +93,13 @@ class Txt2SpeechConfig(Config):
     vocoder_name = txt2speech_cfg['vocoder_name']
     vocoder_local_path = txt2speech_cfg['vocoder_local_path']
     load_vocoder_from_local = txt2speech_cfg['load_vocoder_from_local']
-    
+
+ 
     #Config for ff5_tts
-    ref_audio_neutral = txt2speech_cfg['ref_audio_neutral']
-    ref_text_neutral = txt2speech_cfg['ref_text_neutral']
-    ref_audio_sad = txt2speech_cfg['ref_audio_sad']
-    ref_text_sad = txt2speech_cfg['ref_text_sad']
+    ref_audio_neutral = ff5_tts_custom_cfg['ref_audio_neutral']
+    ref_text_neutral = ff5_tts_custom_cfg['ref_text_neutral']
+    # ref_audio_sad = ff5_tts_custom_cfg['ref_audio_sad']
+    # ref_text_sad = ff5_tts_custom_cfg['ref_text_sad']
 
     #Config for DiT model
     dim = DiT_cfg['dim']
