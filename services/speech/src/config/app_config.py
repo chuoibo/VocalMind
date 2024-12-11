@@ -41,6 +41,7 @@ class Speech2TxtConfig(Config):
     model_cache= speech2txt_cfg['model_cache']
     post_processing_task = speech2txt_cfg['post_processing_task']
     post_processing_model_cache = speech2txt_cfg['post_processing_model_cache']
+    device_name = speech2txt_cfg['device_name']
     sampling_rate = speech2txt_cfg['sampling_rate']
     return_tensors = speech2txt_cfg['return_tensors']
     padding = speech2txt_cfg['padding']
