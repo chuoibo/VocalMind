@@ -3,15 +3,17 @@ speech2txt:
   model_cache: /speech/common_dir/speech2txt
   post_processing_model_cache: /speech/common_dir/text_processing
   post_processing_task: text2text-generation
-  max_len_chunk: 2048
-  pre_processing_multiplier: 1.2
+  max_len_post_processing: 2048
   sampling_rate: 16000
   vad_mode: 3
-  silence_limit_seconds : 3
+  silence_limit_seconds : 3.0
   rate : 16000  
   frame_duration : 30
-  min_pause: 0.5
-  max_pause: 2
+  channels: 1
+  return_tensors: pt
+  padding: True
+
+  
 
 
 emotion_analysis:

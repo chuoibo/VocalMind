@@ -7,28 +7,16 @@ from transformers import LlamaForCausalLM, PreTrainedTokenizerFast
 from src.config.app_config import LLMConfig as lc
 
 
-TEXT_GENERATION_MODEL = None
-TEXT_GENERATION_TOKENIZER = None
-
-
 class TextGeneration:
     def __init__(self):
-        global TEXT_GENERATION_MODEL, TEXT_GENERATION_TOKENIZER
-
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        if TEXT_GENERATION_TOKENIZER is None:
-            logging.info('Loading the text generation tokenizer if it is the first time ...')
-            TEXT_GENERATION_TOKENIZER = PreTrainedTokenizerFast.from_pretrained(lc.model_cache)
-        
-        self.tokenizer = TEXT_GENERATION_TOKENIZER
+        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(lc.model_cache)
         logging.info('Initialize text generation tokenizer')
 
-        if TEXT_GENERATION_MODEL is None:
-            logging.info('Loading the text generation model if it is the first time ...')
-            TEXT_GENERATION_MODEL = LlamaForCausalLM.from_pretrained(lc.model_cache)
+
+        self.model = LlamaForCausalLM.from_pretrained(lc.model_cache)
         
-        self.model = TEXT_GENERATION_MODEL
         logging.info('Initialize text generation model')
 
         self.temperature = lc.temperature
@@ -41,7 +29,7 @@ class TextGeneration:
 
     def postprocess_text(self, text):
         logging.info('Post-process the text generation')
-        answer = re.sub(r"<\|begin_of_text\|>.*?Answer:\s*", "", text, flags=re.DOTALL)
+        answer = re.sub(r"<\|begin_of_text\|>.*?Response:\s*", "", text, flags=re.DOTALL)
         answer = re.sub(r"<\|end_of_text\|>", "", answer)
         answer = answer.strip()
         
@@ -60,12 +48,13 @@ class TextGeneration:
         return final_text.strip()
 
 
-    def run(self, input_text):
+    def run(self, input_text, emotion):
         logging.info('Starting text generation inference process')
 
         self.model.to(self.device)
 
-        prompt = f"Please answer the following question as short as possible:\nQuestion: {input_text}\nAnswer:"
+        prompt = f"Please respond to the following input in a concise manner, considering the user's emotion:\nEmotion: {emotion}\nInput: {input_text}\nResponse:"
+
 
         inputs = self.tokenizer(prompt, return_tensors=self.return_tensors).to(self.device)
 

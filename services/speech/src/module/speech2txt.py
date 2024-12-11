@@ -1,157 +1,187 @@
-import torch
 import time
-import logging
+import threading
+import pyaudio
+import webrtcvad
 import numpy as np
-import onnxruntime as ort
 
-from itertools import groupby
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+from queue import  Queue, Empty
+from concurrent.futures import ThreadPoolExecutor
 
 from src.utils.common import *
 from src.config.app_config import Speech2TxtConfig as sc
-
-from src.module.record.record_speech import Record
 from src.module.processing.text_processing import TextProcessing
-from src.module.processing.record_processing import RecordProcessing
-
-SPEECH_2_TXT_MODEL = None
-SPEECH_2_TXT_MODEL_FLAG = None
-SPEECH_2_TXT_PROCESSOR = None
+from src.module.wav2vec2.wav2vec2_inference import Wav2vec2Inference
 
 class Speech2Txt:
-    def __init__(self):
-        global SPEECH_2_TXT_MODEL, SPEECH_2_TXT_PROCESSOR, SPEECH_2_TXT_MODEL_FLAG
+    exit_event = threading.Event()
+    def __init__(self, device_name='default'):
+        self.device_name = device_name
+        self.silence_limit_seconds = sc.silence_limit_seconds
+        with ThreadPoolExecutor() as executor:
+           future_wav2vec2 = executor.submit(Wav2vec2Inference)
+           future_txt_processing = executor.submit(TextProcessing)
 
-        self.model_name = sc.model_name
-        self.model_cache = sc.model_cache
+           self.wav2vec2 = future_wav2vec2.result()
+           self.txt_processing = future_txt_processing.result()
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        if not os.path.exists(sc.model_cache):
-            make_directory(sc.model_cache)
+    def stop(self):
+        logging.info("stop the asr process")
+        Speech2Txt.exit_event.set()
+        self.asr_input_queue.put("close")
+        self.asr_output_queue.put("close")
+        self.asr_output_queue.put(None)
 
-        if SPEECH_2_TXT_MODEL is None:
-            onnx_file = find_files(directory_path=sc.model_cache, type_file='onnx')
-            if onnx_file:
-                SPEECH_2_TXT_MODEL_FLAG = 'onnx'
-                SPEECH_2_TXT_MODEL = ort.InferenceSession(onnx_file[0], providers=['CUDAExecutionProvider'])
-                logging.info('Loaded ONNX model for the first time.')
+        # Wait for threads to finish
+        self.vad_process.join()
+        self.asr_process.join()
+        self.spelling_correction_process.join()
+        logging.info("Speech to text process stopped")
+
+
+    def start(self):
+        logging.info("Start the speech to text process")
+        self.asr_output_queue = Queue()
+        self.asr_input_queue = Queue()
+        self.corrected_output_queue = Queue()
+
+        self.asr_process = threading.Thread(
+            target=Speech2Txt.asr_process, 
+            args=(self.asr_input_queue, self.asr_output_queue, self.wav2vec2))
+        self.asr_process.start()
+
+        self.vad_process = threading.Thread(
+            target=Speech2Txt.vad_process, 
+            args=(self.device_name, self.asr_input_queue))
+        self.vad_process.start()
+
+        self.spelling_correction_process = threading.Thread(
+            target=Speech2Txt.spelling_correction_process, 
+            args=(self.asr_output_queue, self.corrected_output_queue, self.txt_processing))
+        self.spelling_correction_process.start()
+  
+
+    @staticmethod
+    def vad_process(device_name, asr_input_queue):
+        logging.info('Start voice activity detection process ...')
+        vad = webrtcvad.Vad()
+        vad.set_mode(sc.vad_mode)
+
+        audio = pyaudio.PyAudio()
+        FORMAT = pyaudio.paInt16
+        CHUNK = int(sc.rate * sc.frame_duration / 1000)
+
+        microphones = Speech2Txt.list_microphones(audio)
+        selected_input_device_id = Speech2Txt.get_input_device_id(
+            device_name, microphones)
+
+        stream = audio.open(input_device_index=selected_input_device_id,
+                            format=FORMAT,
+                            channels=sc.channels,
+                            rate=sc.rate,
+                            input=True,
+                            frames_per_buffer=CHUNK)
+
+        frames = b''
+        while True:
+            if Speech2Txt.exit_event.is_set():
+                break
+            frame = stream.read(CHUNK, exception_on_overflow=False)
+            is_speech = vad.is_speech(frame, sc.rate)
+            if is_speech:
+                frames += frame
             else:
-                SPEECH_2_TXT_MODEL_FLAG = 'hf'
-                SPEECH_2_TXT_MODEL = Wav2Vec2ForCTC.from_pretrained(
-                    pretrained_model_name_or_path=self.model_name,
-                    cache_dir=self.model_cache
-                ).to(self.device)
-                logging.info('Loaded pretrained Hugging Face model for the first time.')
+                if len(frames) > 1:
+                    asr_input_queue.put(frames)
+                frames = b''
+        stream.stop_stream()
+        stream.close()
+        audio.terminate()
 
-        self.model = SPEECH_2_TXT_MODEL
-        self.model_type = SPEECH_2_TXT_MODEL_FLAG
-        logging.info('Initialized pretrained model.')
+    
+    @staticmethod
+    def asr_process(in_queue, output_queue, wave2vec_asr):
+        logging.info("\n--------------------------Listening to your voice--------------------------\n")
 
-        if self.model_type == 'hf':
-            warm_up_model(model=self.model, device=self.device)
-            logging.info('Warming up model ...')
+        while True:
+            audio_frames = in_queue.get()
+            if audio_frames == "close":
+                break
 
-        if SPEECH_2_TXT_PROCESSOR is None:
-            SPEECH_2_TXT_PROCESSOR = Wav2Vec2Processor.from_pretrained(pretrained_model_name_or_path=sc.model_name, 
-                                                                       cache_dir=sc.model_cache)
-
-        self.processor = SPEECH_2_TXT_PROCESSOR
-        logging.info('Loading pretrained processor ...')
-
-        self.sampling_rate = sc.sampling_rate
-        self.output_file_path = sc.output_file_path
-        
-        logging.info('Initialized speech recognition module ...')
+            float64_buffer = np.frombuffer(
+                audio_frames, dtype=np.int16) / 32767
+            text = wave2vec_asr.speech_recognition(float64_buffer)
+            text = text.lower()
+            if text != "":
+                output_queue.put(text)
+                logging.info(f'Raw text: {text}')
     
 
-    def word_level_forced_align(self, predicted_ids: torch.Tensor, input_values: np.ndarray, output_generated_speech: str):
-        logging.info('Starting to get the word-level start and end timestamps.')
-        words = [w for w in output_generated_speech.split(' ') if len(w) > 0]
-        predicted_ids = predicted_ids[0].tolist()
-        duration_sec = input_values.shape[1] / 16_000
+    @staticmethod
+    def spelling_correction_process(input_queue, output_queue, text_processing):
+        while True:
+            text = input_queue.get()
+            if text == "close":
+                break
 
-        ids_w_time = [(i / len(predicted_ids) * duration_sec, _id) for i, _id in enumerate(predicted_ids)]
-        ids_w_time = [i for i in ids_w_time if i[1] != self.processor.tokenizer.pad_token_id]
-        split_ids_w_time = [list(group) for k, group
-                            in groupby(ids_w_time, lambda x: x[1] == self.processor.tokenizer.word_delimiter_token_id)
-                            if not k]
-
-        assert len(split_ids_w_time) == len(words)  
-        word_start_times = []
-        word_end_times = []
-        for cur_ids_w_time, _ in zip(split_ids_w_time, words):
-            _times = [_time for _time, _id in cur_ids_w_time]
-            word_start_times.append(min(_times))
-            word_end_times.append(max(_times))
-        
-        logging.info(words)
-
-        word_timings = {
-            i: {
-                'word': word,
-                'start_time': round(word_start_time, 4),
-                'end_time': round(word_end_time, 4)
-            }
-            for i, (word, word_start_time, word_end_time) in enumerate(zip(words, word_start_times, word_end_times))
-        }
-        logging.info('Finish getting the word-level start and end timestamps.')
-        
-        return word_timings
+            corrected_text = text_processing.text_post_processing(text)
+            output_queue.put(corrected_text)
 
 
-    def run(self, live_record):
+    @staticmethod
+    def get_input_device_id(device_name, microphones):
+        for device in microphones:
+            if device_name in device[1]:
+                return device[0]
+
+
+    @staticmethod
+    def list_microphones(pyaudio_instance):
+        info = pyaudio_instance.get_host_api_info_by_index(0)
+        numdevices = info.get('deviceCount')
+
+        result = []
+        for i in range(0, numdevices):
+            if (pyaudio_instance.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
+                name = pyaudio_instance.get_device_info_by_host_api_device_index(
+                    0, i).get('name')
+                result += [[i, name]]
+        return result
+
+
+    def get_last_text(self):
+        logging.info("returns the text, sample length and inference time in seconds.")
+        return self.corrected_output_queue.get(timeout=self.silence_limit_seconds)
+    
+
+    def run(self, live_record: bool):
         if live_record:
-            record_voice, pause_markers = Record().record_audio()
-    
-        record_process = RecordProcessing(pause_markers=pause_markers)
-        classified_pauses = record_process.process_pause_markers()
-        
-        if self.model_type == 'hf':
-            input_values = self.processor(record_voice, sampling_rate=sc.sampling_rate, return_tensors='pt').input_values
-            logging.info('Loading and pre-processing input values ...')
+            logging.info('Real time inferencing Wav2vec2 ...')
+            self.start()
+            final_text = ''
 
-            start_time = time.time()
+            try:
+                while True:
+                    try:
+                        text = self.get_last_text()
+                        if text is None:  
+                            break
+                        
+                        elif text:
+                            logging.info(f"Current text: {text}")
+                            final_text += text + ' '
+                    
+                    except Empty:
+                        logging.info("No voice detected for the timeout duration. Exiting...")
+                        break
 
-            with torch.no_grad():  
-                logits = self.model(input_values.to(self.device)).logits
+                logging.info(f"Final Text: {final_text}")
+
+            except KeyboardInterrupt:
+                logging.info("\nInterrupted by user.")
+            finally:
+                self.stop()
             
-            predicted_ids = torch.argmax(logits, dim=-1)
-            generated_text = self.processor.batch_decode(predicted_ids)
+            return final_text
+    
 
-            end_time = time.time()
-
-            inference_time = end_time - start_time
-        
-        elif self.model_type == 'onnx':
-            input_values = self.processor(record_voice, sampling_rate=sc.sampling_rate, return_tensors='np').input_values
-            onnx_inputs = {"input_values": input_values}
-            logging.info('Loading and pre-processing onnx input values ...')
-
-            start_time = time.time()
-            logits = self.model.run(None, onnx_inputs)[0]
-            predicted_ids = np.argmax(logits, axis=-1)
-            generated_text = self.processor.batch_decode(predicted_ids)
-            end_time = time.time()
-
-        logging.info(f"Inference time : {inference_time:.4f} seconds")
-
-        output_generated_speech = str(generated_text[0]).lower()
-
-        word_timings = self.word_level_forced_align(input_values=input_values, 
-                                                    predicted_ids=predicted_ids,
-                                                    output_generated_speech=output_generated_speech)
-        
-        generated_text_with_punctuations = record_process.mapping_punctuations(word_timings=word_timings,
-                                                                               pause_markers=classified_pauses)
-
-        logging.info('Starting post processing generated text ...')
-        postprocessing = TextProcessing()
-        processed_generated_speech = postprocessing.text_post_processing(generated_text_with_punctuations)
-        
-        logging.info('Finish speech to text recognition module ...')
-
-        return processed_generated_speech
-
-if __name__ == '__main__':
-    torch.multiprocessing.set_start_method('spawn')
