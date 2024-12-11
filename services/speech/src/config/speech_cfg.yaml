@@ -3,6 +3,7 @@ speech2txt:
   model_cache: /speech/common_dir/speech2txt
   post_processing_model_cache: /speech/common_dir/text_processing
   post_processing_task: text2text-generation
+  device_name: default
   max_len_post_processing: 2048
   sampling_rate: 16000
   vad_mode: 3

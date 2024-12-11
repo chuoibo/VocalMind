@@ -36,6 +36,7 @@ def test_celery_task(input_data):
 
 if __name__ == "__main__":
     input_model = {
-        "live_record": True
+        "live_record": False,
+        'input_audio_file_path': './common_dir/input/output.wav'
         }
     test_celery_task(input_model)

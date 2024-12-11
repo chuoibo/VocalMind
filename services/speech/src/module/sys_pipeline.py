@@ -15,9 +15,10 @@ from src.schema.speech_system_schema import (InputSpeechSystemModel,
 class SpeechSystem:
     def __init__(self, inp: InputSpeechSystemModel):
         self.live_record = inp.live_record
+        self.input_audio_file_path = inp.input_audio_file_path
         
         with ThreadPoolExecutor() as executor:
-            future_text_speech_to_text = executor.submit(Speech2Txt)
+            future_text_speech_to_text = executor.submit(Speech2Txt, self.live_record, self.input_audio_file_path)
             future_text_generation = executor.submit(TextGeneration)
             future_emotion_analysis = executor.submit(EmotionAnalysis)
 
@@ -27,7 +28,7 @@ class SpeechSystem:
 
     
     def run(self) -> OutputSpeechSystemModel:
-        speech_recognition = self.speech_to_text.run(self.live_record)
+        speech_recognition = self.speech_to_text.run()
 
         if speech_recognition == '':
             raise ValueError('Cannot do automatic speech recognition ...')
