@@ -20,7 +20,7 @@ class Config:
     REDIS_URL = os.getenv('REDIS_URL', f'redis://:{REDIS_PWD}@redis:6379/0')
     
     # Additional configurations
-    LOG_DIR = "/asr/logs"
+    LOG_DIR = "/speech/logs"
     LOG_FILEPATH = os.path.join(LOG_DIR,"celery.log")
     COMMON_DIR = "/common_dir"
 
@@ -41,17 +41,17 @@ class Speech2TxtConfig(Config):
     model_cache= speech2txt_cfg['model_cache']
     post_processing_task = speech2txt_cfg['post_processing_task']
     post_processing_model_cache = speech2txt_cfg['post_processing_model_cache']
-    max_len_chunk = speech2txt_cfg['max_len_chunk']
-    pre_processing_multiplier = speech2txt_cfg['pre_processing_multiplier']
     sampling_rate = speech2txt_cfg['sampling_rate']
+    return_tensors = speech2txt_cfg['return_tensors']
+    padding = speech2txt_cfg['padding']
+    max_len_post_processing = speech2txt_cfg['max_len_post_processing']
 
     #For recording
     vad_mode = speech2txt_cfg['vad_mode']
     silence_limit_seconds = speech2txt_cfg['silence_limit_seconds']
     rate = speech2txt_cfg['rate']
     frame_duration = speech2txt_cfg['frame_duration']
-    min_pause = speech2txt_cfg['min_pause']
-    max_pause = speech2txt_cfg['max_pause']
+    channels = speech2txt_cfg['channels']
     
 
 class EmotionAnalysisConfig(Config):
