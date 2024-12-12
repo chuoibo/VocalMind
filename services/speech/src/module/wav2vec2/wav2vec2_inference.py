@@ -8,13 +8,8 @@ from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
 from src.utils.common import *
 from src.config.app_config import Speech2TxtConfig as sc
 
-WAV2_VEC2_MODEL = None
-WAV2_VEC2_FLAG = None
-
 class Wav2vec2Inference:
     def __init__(self):
-        global WAV2_VEC2_MODEL, WAV2_VEC2_FLAG
-
         self.model_name = sc.model_name
         self.model_cache = sc.model_cache
         self.sampling_rate = sc.sampling_rate
@@ -26,22 +21,19 @@ class Wav2vec2Inference:
         if not os.path.exists(sc.model_cache):
             make_directory(sc.model_cache)
 
-        if WAV2_VEC2_MODEL is None:
-            onnx_file = find_files(directory_path=sc.model_cache, type_file='onnx')
-            if onnx_file:
-                WAV2_VEC2_FLAG = 'onnx'
-                WAV2_VEC2_MODEL = ort.InferenceSession(onnx_file[0], providers=['CPUExecutionProvider'])
-                logging.info('Loaded ONNX model for the first time.')
-            else:
-                WAV2_VEC2_FLAG = 'hf'
-                WAV2_VEC2_MODEL = Wav2Vec2ForCTC.from_pretrained(
-                    pretrained_model_name_or_path=self.model_name,
-                    cache_dir=self.model_cache
-                ).to(self.device)
-                logging.info('Loaded pretrained Hugging Face model for the first time.')
+        onnx_file = find_files(directory_path=sc.model_cache, type_file='onnx')
+        if onnx_file:
+            self.model_type = 'onnx'
+            self.model = ort.InferenceSession(onnx_file[0], providers=['CPUExecutionProvider'])
+            logging.info('Loaded ONNX model for the first time.')
+        else:
+            self.model_type = 'hf'
+            self.model = Wav2Vec2ForCTC.from_pretrained(
+                pretrained_model_name_or_path=self.model_name,
+                cache_dir=self.model_cache
+            ).to(self.device)
+            logging.info('Loaded pretrained Hugging Face model for the first time.')
 
-        self.model = WAV2_VEC2_MODEL
-        self.model_type = WAV2_VEC2_FLAG
         logging.info('Initialized pretrained model.')
 
         if self.model_type == 'hf':

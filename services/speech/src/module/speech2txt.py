@@ -2,6 +2,7 @@ import threading
 import pyaudio
 import webrtcvad
 import wave
+import time
 import numpy as np
 
 from queue import  Queue, Empty
@@ -12,6 +13,8 @@ from src.config.app_config import Speech2TxtConfig as sc
 from src.module.processing.text_processing import TextProcessing
 from src.module.wav2vec2.wav2vec2_inference import Wav2vec2Inference
 
+WAV2VEC2_INIT = None
+TEXT_PROCESSING_INIT = None
 
 class VADProcessor:
     """Handles Voice Activity Detection."""
@@ -119,7 +122,6 @@ class ASRProcessor:
                 break
 
             float64_buffer = np.frombuffer(audio_frames, dtype=np.int16) / 32767
-            logging.info(f'---------------------{audio_frames}')
             text = self.model.speech_recognition(float64_buffer).lower()
 
             if text:
@@ -149,6 +151,8 @@ class Speech2Txt:
     exit_event = threading.Event()
 
     def __init__(self, live_record, input_audio_file_path):
+        global WAV2VEC2_INIT, TEXT_PROCESSING_INIT
+
         self.live_record = live_record
         self.input_audio_file_path = input_audio_file_path
         self.device_name = sc.device_name
@@ -156,16 +160,24 @@ class Speech2Txt:
         self.asr_input_queue = Queue()
         self.corrected_output_queue = Queue()
 
-        with ThreadPoolExecutor() as executor:
-           future_wav2vec2 = executor.submit(Wav2vec2Inference)
-           future_txt_processing = executor.submit(TextProcessing)
+        if (WAV2VEC2_INIT is None) or (TEXT_PROCESSING_INIT is None):
+            with ThreadPoolExecutor() as executor:
+                future_wav2vec2 = executor.submit(Wav2vec2Inference)
+                future_txt_processing = executor.submit(TextProcessing)
 
-           self.wav2vec2 = future_wav2vec2.result()
-           self.txt_processing = future_txt_processing.result()
+                if WAV2VEC2_INIT is None:
+                    WAV2VEC2_INIT = future_wav2vec2.result()
+                
+                if TEXT_PROCESSING_INIT is None:
+                    TEXT_PROCESSING_INIT = future_txt_processing.result()
+
+        self.wav2vec2 = WAV2VEC2_INIT
+        self.txt_processing = TEXT_PROCESSING_INIT
 
         self.vad_processor = VADProcessor()
         self.asr_processor = ASRProcessor(self.wav2vec2)
         self.text_processor = TextProcessor(self.txt_processing)
+
 
     def start(self):
         """Start the Speech-to-Text process."""
@@ -210,6 +222,7 @@ class Speech2Txt:
 
     def run(self):
         """Run the pipeline."""
+        start_time = time.time()
         self.start()
         final_text = ""
 
@@ -227,8 +240,9 @@ class Speech2Txt:
             logging.info("Interrupted by user.")
         finally:
             self.stop()
+        end_time = time.time()
 
-        logging.info(f"Final Text: {final_text}")
+        logging.info(f"Final Text: {final_text} with inference time: {end_time-start_time}s")
         return final_text
     
 

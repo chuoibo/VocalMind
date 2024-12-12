@@ -6,21 +6,17 @@ import time
 from transformers import LlamaForCausalLM, PreTrainedTokenizerFast
 from src.config.app_config import LLMConfig as lc
 
-TEXT_GENERATION_MODEL = None
 
 class TextGeneration:
     def __init__(self):
-        global TEXT_GENERATION_MODEL
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self.tokenizer = PreTrainedTokenizerFast.from_pretrained(lc.model_cache)
         logging.info('Initialize text generation tokenizer')
 
-        if TEXT_GENERATION_MODEL is None:
-            logging.info('Loading text genearation if this is the first time ...')
-            TEXT_GENERATION_MODEL = LlamaForCausalLM.from_pretrained(lc.model_cache)
+        logging.info('Loading text genearation if this is the first time ...')
+        self.model = LlamaForCausalLM.from_pretrained(lc.model_cache)
         
-        self.model = TEXT_GENERATION_MODEL
         logging.info('Initialize text generation model')
 
         self.temperature = lc.temperature
@@ -59,7 +55,7 @@ class TextGeneration:
 
         if emotion == 'sad':
             prompt = (
-                f"The user is feeling sad. Respond in a compassionate and comforting way to uplift their spirits."
+                f"The user is feeling sad. Please respond to their input in a manner that aligns with their current emotional state."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         

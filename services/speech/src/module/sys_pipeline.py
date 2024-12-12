@@ -12,28 +12,44 @@ from src.schema.speech_system_schema import (InputSpeechSystemModel,
                                              StatusModel,
                                              StatusEnum)
 
+TEXT_GENERATION_INIT = None
+EMOTION_ANALYSIS_INIT = None
+
 class SpeechSystem:
     def __init__(self, inp: InputSpeechSystemModel):
+        global TEXT_GENERATION_INIT, EMOTION_ANALYSIS_INIT
+
         self.live_record = inp.live_record
         self.input_audio_file_path = inp.input_audio_file_path
-        
+
         with ThreadPoolExecutor() as executor:
-            future_text_speech_to_text = executor.submit(Speech2Txt, self.live_record, self.input_audio_file_path)
-            future_text_generation = executor.submit(TextGeneration)
-            future_emotion_analysis = executor.submit(EmotionAnalysis)
+            future_text_generation = executor.submit(
+                lambda: TEXT_GENERATION_INIT or TextGeneration()
+            )
 
-            self.text_generation = future_text_generation.result()
-            self.emotion_analysis = future_emotion_analysis.result()
-            self.speech_to_text = future_text_speech_to_text.result()
+            future_emotion_analysis = executor.submit(
+                lambda: EMOTION_ANALYSIS_INIT or EmotionAnalysis()
+            )
 
-    
+            future_speech_to_text = executor.submit(
+                Speech2Txt, self.live_record, self.input_audio_file_path
+            )
+
+            TEXT_GENERATION_INIT = future_text_generation.result()
+            EMOTION_ANALYSIS_INIT = future_emotion_analysis.result()
+
+            self.speech_to_text = future_speech_to_text.result()
+
+        self.emotion_analysis = EMOTION_ANALYSIS_INIT
+        self.text_generation = TEXT_GENERATION_INIT
+
+
+
     def run(self) -> OutputSpeechSystemModel:
-        # speech_recognition = self.speech_to_text.run()
+        speech_recognition = self.speech_to_text.run()
 
-        # if speech_recognition == '':
-        #     raise ValueError('Cannot do automatic speech recognition ...')
-
-        speech_recognition = 'I dont know what to say, but know i am feeling like really lost'
+        if speech_recognition == '':
+            raise ValueError('Cannot do automatic speech recognition ...')
 
         emotion = self.emotion_analysis.run(speech_recognition)
 
