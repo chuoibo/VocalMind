@@ -10,10 +10,11 @@ from src.utils.common import *
 from src.config.app_config import EmotionAnalysisConfig as ec
 
 EMOTION_ANALYSIS_MODEL = None
+EMOTION_ANALYSIS_FLAG = None
 
 class EmotionAnalysis:
     def __init__(self):
-        global EMOTION_ANALYSIS_MODEL
+        global EMOTION_ANALYSIS_MODEL, EMOTION_ANALYSIS_FLAG
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -28,15 +29,16 @@ class EmotionAnalysis:
         if EMOTION_ANALYSIS_MODEL is None:
             onnx_file = find_files(directory_path=ec.model_cache, type_file='onnx')
             if onnx_file:
-                self.model_type = 'onnx'
+                EMOTION_ANALYSIS_FLAG = 'onnx'
                 EMOTION_ANALYSIS_MODEL = ort.InferenceSession(onnx_file[0], providers=['CUDAExecutionProvider'])
                 logging.info('Loading ONNX model for the first time.')
             else:
-                self.model_type = 'hf'
+                EMOTION_ANALYSIS_FLAG = 'hf'
                 EMOTION_ANALYSIS_MODEL = pipeline(self.model_name, model=self.model_cache, device=self.device)
                 logging.info('Loading pretrained Hugging Face model for the first time.')
             
         self.model = EMOTION_ANALYSIS_MODEL
+        self.model_type = EMOTION_ANALYSIS_FLAG
         logging.info('Initialized pretrained model.')
 
         self.processor = AutoTokenizer.from_pretrained(self.model_cache)
