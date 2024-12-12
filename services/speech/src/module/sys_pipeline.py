@@ -28,10 +28,12 @@ class SpeechSystem:
 
     
     def run(self) -> OutputSpeechSystemModel:
-        speech_recognition = self.speech_to_text.run()
+        # speech_recognition = self.speech_to_text.run()
 
-        if speech_recognition == '':
-            raise ValueError('Cannot do automatic speech recognition ...')
+        # if speech_recognition == '':
+        #     raise ValueError('Cannot do automatic speech recognition ...')
+
+        speech_recognition = 'I dont know what to say, but know i am feeling like really lost'
 
         emotion = self.emotion_analysis.run(speech_recognition)
 
