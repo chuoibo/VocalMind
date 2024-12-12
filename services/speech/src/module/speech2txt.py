@@ -11,7 +11,7 @@ from src.utils.common import *
 from src.config.app_config import Speech2TxtConfig as sc
 from src.module.processing.text_processing import TextProcessing
 from src.module.wav2vec2.wav2vec2_inference import Wav2vec2Inference
-from src.schema.speech_system_schema import InputSpeechSystemModel
+
 
 class VADProcessor:
     """Handles Voice Activity Detection."""

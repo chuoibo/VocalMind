@@ -6,17 +6,21 @@ import time
 from transformers import LlamaForCausalLM, PreTrainedTokenizerFast
 from src.config.app_config import LLMConfig as lc
 
+TEXT_GENERATION_MODEL = None
 
 class TextGeneration:
     def __init__(self):
+        global TEXT_GENERATION_MODEL
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self.tokenizer = PreTrainedTokenizerFast.from_pretrained(lc.model_cache)
         logging.info('Initialize text generation tokenizer')
 
-
-        self.model = LlamaForCausalLM.from_pretrained(lc.model_cache)
+        if TEXT_GENERATION_MODEL is None:
+            logging.info('Loading text genearation if this is the first time ...')
+            TEXT_GENERATION_MODEL = LlamaForCausalLM.from_pretrained(lc.model_cache)
         
+        self.model = TEXT_GENERATION_MODEL
         logging.info('Initialize text generation model')
 
         self.temperature = lc.temperature
@@ -53,7 +57,41 @@ class TextGeneration:
 
         self.model.to(self.device)
 
-        prompt = f"Please respond to the following input in a concise manner, considering the user's emotion:\nEmotion: {emotion}\nInput: {input_text}\nResponse:"
+        if emotion == 'sad':
+            prompt = (
+                f"The user is feeling sad. Respond in a compassionate and comforting way to uplift their spirits."
+                f"\n\nInput: {input_text}\nResponse:"
+            )
+        
+        elif emotion == 'joy':
+            prompt = (
+                f"The user is feeling happy. Respond in an enthusiastic and celebratory manner to encourage their positivity."
+                f"\n\nInput: {input_text}\nResponse:"
+            )
+        
+        elif emotion == 'fear':
+            prompt = (
+                f"The user is feeling happy. Respond in an enthusiastic and celebratory manner to encourage their positivity."
+                f"\n\nInput: {input_text}\nResponse:"
+            )
+        
+        elif emotion == 'anger':
+            prompt = (
+                f"The user is feeling angry. Respond in a calm and understanding manner, acknowledging their feelings and helping them process their emotions constructively."
+                f"\n\nInput: {input_text}\nResponse:"
+            )
+        
+        elif emotion == 'surprise':
+            prompt = (
+                f"The user is feeling surprised. Respond in a curious and engaging manner to match their surprise and encourage them to share more about their experience."
+                f"\n\nInput: {input_text}\nResponse:"
+            )
+        
+        elif emotion == 'neutral':
+            prompt = (
+                f"Respond in an informative and balanced manner, maintaining a neutral and respectful tone"
+                f"\n\nInput: {input_text}\nResponse:"
+            )
 
 
         inputs = self.tokenizer(prompt, return_tensors=self.return_tensors).to(self.device)
