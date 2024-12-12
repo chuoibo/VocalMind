@@ -3,18 +3,18 @@ import time
 import torch
 import numpy as np
 import onnxruntime as ort
-import torch.multiprocessing as mp
 
 from transformers import pipeline, AutoTokenizer
 
 from src.utils.common import *
 from src.config.app_config import EmotionAnalysisConfig as ec
-from src.config.app_config import Txt2SpeechConfig as tc
+
+EMOTION_ANALYSIS_MODEL = None
 
 class EmotionAnalysis:
     def __init__(self):
-        mp.set_start_method('fork', force=True)
-        
+        global EMOTION_ANALYSIS_MODEL
+
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self.model_name = ec.model_name
@@ -25,16 +25,18 @@ class EmotionAnalysis:
         self.max_length = ec.max_length
         self.class_labels = ['anger', 'disgust', 'fear', 'joy', 'neutral', 'sadness', 'surprise']
 
-        onnx_file = find_files(directory_path=ec.model_cache, type_file='onnx')
-        if onnx_file:
-            self.model_type = 'onnx'
-            self.model = ort.InferenceSession(onnx_file[0], providers=['CUDAExecutionProvider'])
-            logging.info('Loading ONNX model for the first time.')
-        else:
-            self.model_type = 'hf'
-            self.model = pipeline(self.model_name, model=self.model_cache, device=self.device)
-            logging.info('Loading pretrained Hugging Face model for the first time.')
-        
+        if EMOTION_ANALYSIS_MODEL is None:
+            onnx_file = find_files(directory_path=ec.model_cache, type_file='onnx')
+            if onnx_file:
+                self.model_type = 'onnx'
+                EMOTION_ANALYSIS_MODEL = ort.InferenceSession(onnx_file[0], providers=['CUDAExecutionProvider'])
+                logging.info('Loading ONNX model for the first time.')
+            else:
+                self.model_type = 'hf'
+                EMOTION_ANALYSIS_MODEL = pipeline(self.model_name, model=self.model_cache, device=self.device)
+                logging.info('Loading pretrained Hugging Face model for the first time.')
+            
+        self.model = EMOTION_ANALYSIS_MODEL
         logging.info('Initialized pretrained model.')
 
         self.processor = AutoTokenizer.from_pretrained(self.model_cache)
