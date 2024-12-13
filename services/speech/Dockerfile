@@ -21,6 +21,7 @@ COPY ./src /speech/src
 # RUN modprobe snd-aloop
 RUN apt-get update && apt-get install -y build-essential portaudio19-dev pulseaudio git
 RUN pip install pyaudio ffmpeg
+RUN pip install coqui-tts
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 RUN chown -R celery_user:celery_user /speech

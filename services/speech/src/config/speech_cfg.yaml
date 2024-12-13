@@ -14,8 +14,6 @@ speech2txt:
   return_tensors: pt
   padding: True
 
-  
-
 
 emotion_analysis:
   model_name: text-classification
@@ -26,31 +24,20 @@ emotion_analysis:
   max_length: 128
 
 
-DiT_cfg:
-  dim: 1024
-  depth: 22
-  heads: 16
-  ff_mult: 2
-  text_dim: 512
-  conv_layers: 4
-
-
-ff5_tts_custom:
-  ref_audio_neutral: /speech/common_dir/txt2speech/ref/basic_ref_en.wav
-  ref_text_neutral: Some call me nature, others call me mother nature.
+tts_ref:
+  ref_audio_neutral: /speech/common_dir/txt2speech/ref/neutral.wav
+  ref_audio_sad: /speech/common_dir/txt2speech/ref/sad.wav
+  ref_audio_happy: /speech/common_dir/txt2speech/ref/happy.wav
+  ref_audio_sympathy: /speech/common_dir/txt2speech/ref/sympathy.wav
+  ref_audio_anger: /speech/common_dir/txt2speech/ref/anger.wav
+  ref_audio_surprise: /speech/common_dir/txt2speech/ref/surprise.wav
 
 
 txt2speech:
-  remove_silence: False
-  output_dir: /speech/common_dir/output/
-  output_file: infer_cli_out.wav
-  model_name: F5-TTS
-  ckpt_file: /speech/common_dir/txt2speech/checkpoints/model_1200000.safetensors
-  vocab_file: /speech/common_dir/txt2speech/ref/vocab.txt
-  speed: 1.0
-  vocoder_name: vocos
-  vocoder_local_path: /speech/common_dir/txt2speech/ref/vocos-mel-24khz
-  load_vocoder_from_local: True
+  model_cache: /speech/common_dir/txt2speech/xtts_v2
+  model_config: /speech/common_dir/txt2speech/xtts_v2/config.json
+  output_file_path: /speech/common_dir/output/output.wav
+  language: en
 
 
 llm:

@@ -81,31 +81,19 @@ class LLMConfig(Config):
 class Txt2SpeechConfig(Config):
     config = Config.load_config()
     txt2speech_cfg = config['txt2speech']
-    ff5_tts_custom_cfg = config['ff5_tts_custom']
-    DiT_cfg = config['DiT_cfg']
+    tts_ref_cfg = config['tts_ref']
 
-    remove_silence = txt2speech_cfg['remove_silence']
-    output_dir = txt2speech_cfg['output_dir']
-    output_file = txt2speech_cfg['output_file']
-    model_name = txt2speech_cfg['model_name']
-    ckpt_file = txt2speech_cfg['ckpt_file']
-    vocab_file = txt2speech_cfg['vocab_file']
-    speed = txt2speech_cfg['speed']
-    vocoder_name = txt2speech_cfg['vocoder_name']
-    vocoder_local_path = txt2speech_cfg['vocoder_local_path']
-    load_vocoder_from_local = txt2speech_cfg['load_vocoder_from_local']
-
+    model_cache = txt2speech_cfg['model_cache']
+    model_config = txt2speech_cfg['model_config']
+    output_file_path = txt2speech_cfg['output_file_path']
+    language = txt2speech_cfg['language']
  
-    #Config for ff5_tts
-    ref_audio_neutral = ff5_tts_custom_cfg['ref_audio_neutral']
-    ref_text_neutral = ff5_tts_custom_cfg['ref_text_neutral']
-    # ref_audio_sad = ff5_tts_custom_cfg['ref_audio_sad']
-    # ref_text_sad = ff5_tts_custom_cfg['ref_text_sad']
+    #Config for tts_ref
+    ref_audio_neutral = tts_ref_cfg['ref_audio_neutral']
+    ref_audio_sad = tts_ref_cfg['ref_audio_sad']
+    ref_audio_happy = tts_ref_cfg['ref_audio_happy']
+    ref_audio_sympathy = tts_ref_cfg['ref_audio_sympathy']
+    ref_audio_surprise = tts_ref_cfg['ref_audio_surprise']
+    ref_audio_anger = tts_ref_cfg['ref_audio_anger']
 
-    #Config for DiT model
-    dim = DiT_cfg['dim']
-    depth = DiT_cfg['depth']
-    heads = DiT_cfg['heads']
-    ff_mult = DiT_cfg['ff_mult']
-    text_dim = DiT_cfg['text_dim']
-    conv_layers = DiT_cfg['conv_layers']
+
