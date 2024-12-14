@@ -28,10 +28,16 @@ class TextGeneration:
     
 
     def postprocess_text(self, text):
-        logging.info('Post-process the text generation')
-        answer = re.sub(r"<\|begin_of_text\|>.*?Response:\s*", "", text, flags=re.DOTALL)
-        answer = re.sub(r"<\|end_of_text\|>", "", answer)
-        answer = answer.strip()
+        match = re.search(r"Response:\s*(.*)", text, flags=re.DOTALL)
+        if match:
+            answer = match.group(1)  
+        else:
+            logging.warning("Response pattern not found in text.")
+            answer = text  
+
+        answer = re.sub(r"<\|end_of_text\|>", "", answer).strip()
+
+        answer = answer.replace("\n", " ").strip()
         
         last_newline_pos = answer.rfind("\n")
         if last_newline_pos == -1: 
@@ -55,37 +61,37 @@ class TextGeneration:
 
         if emotion == 'sad':
             prompt = (
-                f"The user is feeling sad. Please respond to their input in a manner that aligns with their current emotional state."
+                f"The user is feeling sad. Please respond the below input in a manner that aligns with their current emotional state and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'joy':
             prompt = (
-                f"The user is feeling happy. Respond in an enthusiastic and celebratory manner to encourage their positivity."
+                f"The user is feeling happy. Respond the below input in an enthusiastic and celebratory manner to encourage their positivity and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'fear':
             prompt = (
-                f"The user is feeling happy. Respond in an enthusiastic and celebratory manner to encourage their positivity."
+                f"The user is feeling happy. Respond the below input in an enthusiastic and celebratory manner to encourage their positivity and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'anger':
             prompt = (
-                f"The user is feeling angry. Respond in a calm and understanding manner, acknowledging their feelings and helping them process their emotions constructively."
+                f"The user is feeling angry. Respond the below input in a calm and understanding manner, acknowledging their feelings and helping them process their emotions constructively and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'surprise':
             prompt = (
-                f"The user is feeling surprised. Respond in a curious and engaging manner to match their surprise and encourage them to share more about their experience."
+                f"The user is feeling surprised. Respond the below input in a curious and engaging manner to match their surprise and encourage them to share more about their experience and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'neutral':
             prompt = (
-                f"Respond in an informative and balanced manner, maintaining a neutral and respectful tone"
+                f"Respond the below input in an informative and balanced manner, maintaining a neutral and respectful tone and as short as possible"
                 f"\n\nInput: {input_text}\nResponse:"
             )
 
@@ -103,5 +109,8 @@ class TextGeneration:
         end_time = time.time()
 
         processed_answer = self.postprocess_text(answer)
+        
+        logging.info(f'Final generated text: {processed_answer}')
+
         logging.info(f'Finish LLM module in {end_time - start_time}s')
         return processed_answer

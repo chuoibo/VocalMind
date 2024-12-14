@@ -61,6 +61,7 @@ class SpeechSystem:
         emotion = self.emotion_analysis.run(speech_recognition)
 
         generated_text = self.text_generation.run(speech_recognition, emotion)
+        logging.info(f'Final generated text: {generated_text}')
 
         generated_speech = self.text_to_speech.run(generated_text, emotion)
 
