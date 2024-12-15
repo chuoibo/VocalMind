@@ -4,7 +4,7 @@ from src.config.app_config import Config
 
 
 app = Celery(
-    'speech',
+    '__name__',
     broker=Config.MQ_URL,
     backend=Config.REDIS_URL,
 )

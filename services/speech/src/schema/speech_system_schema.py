@@ -8,7 +8,7 @@ class StatusEnum(str, Enum):
 
 class InputSpeechSystemModel(BaseModel):
     live_record: bool
-    input_audio_file_path: StrictStr
+    input_audio_file_path: Optional[StrictStr]
 
 class ResultSpeechSystemModel(BaseModel):
     generated_audio_file: StrictStr
