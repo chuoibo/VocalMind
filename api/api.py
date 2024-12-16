@@ -1,8 +1,6 @@
-import os
-import uuid
-
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import JSONResponse
+from aws_client import upload_to_s3
 from celery.result import AsyncResult
 from worker import celery_client
 
@@ -24,19 +22,18 @@ async def add_task(live_record: bool = Form(...),
                 status_code=400,
             )
         
-        os.makedirs("./common_dir/input/", exist_ok=True)
+        try:
+            file_url = upload_to_s3(input_audio_file_path.file, input_audio_file_path.filename)
+            input_model = {
+                "live_record": False,
+                "input_audio_file_path": file_url,  
+            }
 
+        except Exception as e:
+            return JSONResponse(
+                {"error": f"Failed to upload file to S3: {str(e)}"}, status_code=500
+            )
         
-        file_location = f"./common_dir/input/{uuid.uuid4()}_{input_audio_file_path.filename}"
-
-        with open(file_location, "wb") as buffer:
-            buffer.write(await input_audio_file_path.read())
-
-        input_model = {
-            "live_record": False,
-            "input_audio_file_path": file_location,
-        }
-
     task = celery_client.send_task(
         "speech_ai", args=[input_model], queue="speech_ai_queue"
     )

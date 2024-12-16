@@ -4,3 +4,4 @@ celery==5.3.4
 redis==5.0.0
 python-dotenv==1.0.1
 python-multipart == 0.0.19
+boto3==1.35.81
