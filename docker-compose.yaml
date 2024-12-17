@@ -63,7 +63,7 @@ services:
 
   database:
     build:
-      context: ./database
+      context: ./services/database
       dockerfile: Dockerfile
     ports:
       - 27017:27017  
