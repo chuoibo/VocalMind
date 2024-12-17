@@ -1,6 +1,6 @@
 import logging
 
-log_filename = "/speech/logs/api.log"
+log_filename = "./logs/api.log"
 
 logging.basicConfig(
     level=logging.INFO,  
@@ -10,5 +10,3 @@ logging.basicConfig(
         logging.StreamHandler() 
     ]
 )
-
-

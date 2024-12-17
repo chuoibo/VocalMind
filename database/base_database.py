@@ -1,12 +1,18 @@
 import pymongo
-import logging
+import os
+
+from dotenv import load_dotenv
+
+from api.utils.api_logger import logging
+
+load_dotenv()
 
 class BaseDatabase(object):
     def __init__(self, config):
         self.hostname = config['hostname']
         self.port = config['port']
-        self.user = config['user']
-        self.password = config['password']
+        self.user = os.getenv('DATABASE_USER', 'guest')
+        self.password = os.getenv('DATABASE_PASSWORD', 'guest')
         if (self.user == None or self.password == None) or (self.user == '' or self.password == ''):
             self.url = f'mongodb://{self.hostname}:{self.port}'
         else:

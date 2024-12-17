@@ -5,10 +5,10 @@
 # Description: Script to run Docker Compose for development with GPU support.
 
 echo "Creating logs dir..."
-mkdir -p ./services/speech/logs
+mkdir -p ./logs
 
 echo "Grant permission for log dir and common dir ..."
-sudo chmod -R 777 ./services/speech/logs
+sudo chmod -R 777 ./logs
 sudo chmod -R 777 ./services/common_dir
 
 # Stop any running containers

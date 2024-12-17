@@ -1,17 +1,27 @@
 import os
+import datetime
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.responses import JSONResponse, FileResponse
-from aws_client import upload_to_s3
+from fastapi.responses import JSONResponse, StreamingResponse
 from celery.result import AsyncResult
+
+from aws_client import upload_to_s3
 from worker import celery_client
+from utils.api_logger import logging
+from utils.common import audio_stream
+from database.crud.speech_base_crud import SpeechCRUD
+
+
 
 app = FastAPI()
+speech_crud = SpeechCRUD()
 
 @app.post("/speech")
 async def add_task(live_record: bool = Form(...),
                    input_audio_file_path: UploadFile = File(None)):
     
+    logging.info('Start adding speech task ...')
+
     if live_record:
         input_model = {
             "live_record": True,
@@ -40,6 +50,10 @@ async def add_task(live_record: bool = Form(...),
         "speech_ai", args=[input_model], queue="speech_ai_queue"
     )
 
+    speech_crud.save_task_metadata(task.id, file_url, datetime.now().isoformat())
+
+    logging.info('Finish adding speech task ...')
+
     return {"task_id": task.id}
 
 
@@ -47,6 +61,15 @@ async def add_task(live_record: bool = Form(...),
 async def get_task_result(task_id: str):
     task_result = AsyncResult(task_id, app=celery_client)
     if task_result.ready():
+        result = task_result.get()
+        result_data = result["result"]
+        output_path = result_data.get("generated_audio_file", None)
+
+        status_data = result['status']
+        status = status_data.get("status", None)
+
+        speech_crud.update_task_metadata(task_id, status, output_path)
+
         return {
             "task_id": task_id,
             "status": task_result.status,
@@ -58,20 +81,29 @@ async def get_task_result(task_id: str):
             "status": task_result.status,
             "result": "Not ready",
         }
-    
+
+
+def audio_stream(audio_path):
+    with open(audio_path, "rb") as audio_file:
+        yield from audio_file
+
     
 @app.get("/stream/{task_id}")
 async def stream_task_result(task_id: str):
+    logging.info('Start streaming task result ...')
+
     task_result = AsyncResult(task_id, app=celery_client)
     if task_result.ready():
         result = task_result.get()
-        if "output_audio_file_path" in result:
-            audio_path = result["output_audio_file_path"]
+        result = result['result']
+        if "generated_audio_file" in result:
+            audio_path = result["generated_audio_file"]
+            logging.info(f'Result file path: {audio_path}')
+
             if os.path.exists(audio_path):
-                return FileResponse(
-                    path=audio_path,
+                return StreamingResponse(
+                    audio_stream(audio_path),
                     media_type="audio/wav",
-                    filename=os.path.basename(audio_path),
                 )
             else:
                 raise HTTPException(

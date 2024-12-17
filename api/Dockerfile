@@ -8,6 +8,7 @@ ENV DEBUG True
 COPY . /api
 WORKDIR /api
 
+RUN mkdir -p /api/logs
 RUN pip install -U setuptools pip
 RUN pip install --no-cache-dir -r requirements.txt
 
