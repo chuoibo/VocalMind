@@ -53,25 +53,33 @@ class SpeechSystem:
 
 
     def run(self) -> OutputSpeechSystemModel:
-        speech_recognition = self.speech_to_text.run()
+        try:
+            speech_recognition = self.speech_to_text.run()
+            if speech_recognition == '':
+                raise ValueError('Cannot do automatic speech recognition ...')
+            
+            emotion = self.emotion_analysis.run(speech_recognition)
+            if not emotion:
+                raise ValueError('Failed to analyze emotion.')
+            
+            generated_text = self.text_generation.run(speech_recognition, emotion)
+            if not generated_text:
+                raise ValueError('Failed to generate text.')
+            logging.info(f'Final generated text: {generated_text}')
+            
+            generated_speech = self.text_to_speech.run(generated_text, emotion)
+            if not generated_speech:
+                raise ValueError('Failed to generate speech audio.')
+            
+            result = ResultSpeechSystemModel(generated_audio_file=generated_speech)
+            status = StatusModel(status=StatusEnum.success, message="Processing completed successfully")
+            logging.info('Finish speech module ...')
 
-        if speech_recognition == '':
-            raise ValueError('Cannot do automatic speech recognition ...')
-
-        emotion = self.emotion_analysis.run(speech_recognition)
-
-        generated_text = self.text_generation.run(speech_recognition, emotion)
-        logging.info(f'Final generated text: {generated_text}')
-
-        generated_speech = self.text_to_speech.run(generated_text, emotion)
-
-        result = ResultSpeechSystemModel(
-            generated_audio_file=generated_speech
-        )
-
-        status = StatusModel(status=StatusEnum.success, message="Processing completed successfully")
-        logging.info('Finish speech module ...')
-
+        except Exception as e:
+            logging.error(f'Error in speech module: {str(e)}')
+            result = None
+            status = StatusModel(status=StatusEnum.failure, message=str(e))
+        
         return OutputSpeechSystemModel(
             result=result,
             status=status

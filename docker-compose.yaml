@@ -8,6 +8,8 @@ services:
     depends_on:
       - rabbitmq
       - redis
+      - speech
+      - database
     volumes:
       - ./api:/app
       - ./logs:/api/logs
@@ -57,6 +59,21 @@ services:
             - driver: nvidia
               count: ${GPU_COUNT}
               capabilities: [gpu]
+
+
+  database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    ports:
+      - 27017:27017  
+    volumes:
+      - ./logs:/database/logs
+    environment:
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - vnet
 
 
   rabbitmq:
