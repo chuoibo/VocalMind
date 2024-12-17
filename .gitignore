@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 services/common_dir
+logs

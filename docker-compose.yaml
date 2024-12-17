@@ -10,6 +10,8 @@ services:
       - redis
     volumes:
       - ./api:/app
+      - ./logs:/api/logs
+      - ./services/common_dir:/speech/common_dir
     environment:
       - MQ_URL=${MQ_URL}
       - REDIS_URL=${REDIS_URL}
@@ -38,7 +40,7 @@ services:
       - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
     volumes:
       - ./services/speech/src:/speech/src
-      - ./services/speech/logs:/speech/logs
+      - ./logs:/speech/logs
       - ./services/common_dir:/speech/common_dir
       - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
       - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
