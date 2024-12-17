@@ -6,7 +6,8 @@ from celery.result import AsyncResult
 
 from aws_client import upload_to_s3
 from worker import celery_client
-from api_logger import logging
+from utils.api_logger import logging
+from utils.common import audio_stream
 
 
 app = FastAPI()

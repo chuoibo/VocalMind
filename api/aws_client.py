@@ -6,7 +6,7 @@ import logging
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from dotenv import load_dotenv
 
-from api_logger import logging
+from utils.api_logger import logging
 
 
 load_dotenv()
