@@ -1,5 +1,5 @@
-from base_database import BaseDatabase
-from configs.speech_base_cfg import Configuration
+from src.base_database import BaseDatabase
+from src.configs.speech_base_cfg import Configuration
 
 class SpeechDatabase(BaseDatabase):
     def __init__(self):

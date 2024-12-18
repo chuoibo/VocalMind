@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-from api.utils.api_logger import logging
+from src.utils.api_logger import logging
 
 load_dotenv()
 

@@ -1,5 +1,5 @@
-from db.speech_db import SpeechDatabase
-from api.utils.api_logger import logging
+from src.db.speech_db import SpeechDatabase
+from src.utils.api_logger import logging
 
 class SpeechCRUD:
     def __init__(self):
