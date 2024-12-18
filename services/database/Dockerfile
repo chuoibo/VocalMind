@@ -1,15 +1,18 @@
-FROM mongo:5.0
+ARG BASE_IMAGE=python:3.10.14-slim-bullseye
+FROM ${BASE_IMAGE}
 
-COPY requirements.txt /tmp/requirements.txt
-COPY . /database
+ENV HOST 0.0.0.0
+ENV PORT 8000
+ENV DEBUG True
 
 WORKDIR /database
 
-RUN mkdir -p /database/logs
+COPY . /database
 
-ENV MONGO_INITDB_ROOT_USERNAME=${DATABASE_USER}
-ENV MONGO_INITDB_ROOT_PASSWORD=${DATABASE_PASSWORD}
+RUN mkdir -p /api/logs
+RUN pip install -U setuptools pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r /tmp/requirements.txt
+EXPOSE 8000
 
-
+CMD uvicorn src.main:app --host ${HOST} --port ${PORT}

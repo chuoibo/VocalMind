@@ -1,2 +1,6 @@
 pymongo == 4.10.1
-python-dotenv==1.0.0
+fastapi==0.115.6
+uvicorn==0.33.0
+pydantic==2.9.2
+python-dotenv==1.0.1
+PyYAML==6.0.2

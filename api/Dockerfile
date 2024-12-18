@@ -2,7 +2,7 @@ ARG BASE_IMAGE=python:3.10.14-slim-bullseye
 FROM ${BASE_IMAGE}
 
 ENV HOST 0.0.0.0
-ENV PORT 8000
+ENV PORT 8081
 ENV DEBUG True
 
 COPY . /api

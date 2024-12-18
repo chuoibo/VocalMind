@@ -1,20 +1,18 @@
 import os
-import datetime
+import requests
 
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, File, Form
 from fastapi.responses import JSONResponse, StreamingResponse
 from celery.result import AsyncResult
+from datetime import datetime
 
+from utils import DATABASE_API_URL
 from aws_client import upload_to_s3
 from worker import celery_client
 from utils.api_logger import logging
 from utils.common import audio_stream
-from database.crud.speech_base_crud import SpeechCRUD
-
-
 
 app = FastAPI()
-speech_crud = SpeechCRUD()
 
 @app.post("/speech")
 async def add_task(live_record: bool = Form(...),
@@ -50,7 +48,8 @@ async def add_task(live_record: bool = Form(...),
         "speech_ai", args=[input_model], queue="speech_ai_queue"
     )
 
-    speech_crud.save_task_metadata(task.id, file_url, datetime.now().isoformat())
+    save_payload = {"task_id": task.id, "input_path": file_url, "time_sent": datetime.now().isoformat()}
+    requests.post(f"{DATABASE_API_URL}/task/save", json=save_payload)
 
     logging.info('Finish adding speech task ...')
 
@@ -67,8 +66,9 @@ async def get_task_result(task_id: str):
 
         status_data = result['status']
         status = status_data.get("status", None)
-
-        speech_crud.update_task_metadata(task_id, status, output_path)
+        
+        update_payload = {"task_id": task_id, "status": status, "output_path": output_path}
+        requests.post(f"{DATABASE_API_URL}/task/update", json=update_payload)
 
         return {
             "task_id": task_id,

@@ -20,6 +20,7 @@ services:
       - RMQ_USER=${RMQ_USER}
       - RMQ_PWD=${RMQ_PWD}
       - REDIS_PWD=${REDIS_PWD}
+      - DATABASE_API_URL=${DATABASE_API_URL} 
       - HOST=0.0.0.0
       - PORT=8081
     networks:
@@ -64,14 +65,26 @@ services:
   database:
     build:
       context: ./services/database
-      dockerfile: Dockerfile
     ports:
-      - 27017:27017  
+      - "8000:8000" 
+    environment:
+      - MONGO_URL=${DATABASE_URL}
     volumes:
       - ./logs:/database/logs
+    depends_on:
+      - mongodb
+    networks:
+      - vnet
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - 27017:27017  
     environment:
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${DATABASE_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DATABASE_PASSWORD}
     networks:
       - vnet
 
