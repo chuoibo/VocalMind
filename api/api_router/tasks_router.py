@@ -1,6 +1,6 @@
 import requests
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from utils.api_logger import logging
@@ -20,9 +20,15 @@ async def get_tasks(user_name):
     save_payload = {"task_id": None, "user_id": user_name}
     response = requests.get(f"{DATABASE_API_URL}/task/get_by_user", json=save_payload)
 
+    if response.status_code != 200:
+        logging.error(f"Error fetching tasks: {response.text}")
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+    
+    result = response.json()
+
     logging.info('Finish getting tasks ...')
 
-    return {"result": response['result']}
+    return result['result']
 
 
 @router.get("/get_task/{user_name}/{task_id}")
@@ -38,6 +44,12 @@ async def get_tasks(user_name: str,
     save_payload = {"task_id": task_id, "user_id": user_name}
     response = requests.get(f"{DATABASE_API_URL}/task/get_specific_task", json=save_payload)
 
+    if response.status_code != 200:
+        logging.error(f"Error fetching tasks: {response.text}")
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+    
+    result = response.json()
+
     logging.info('Finish getting tasks ...')
 
-    return {"result": response['result']}
+    return result['result']
