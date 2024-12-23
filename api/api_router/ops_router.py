@@ -64,18 +64,28 @@ async def add_task(
 
 
 @router.get("/stream-input")
-def stream_audio(file_path: str):
+def stream_audio(task_id: str):
     try:
-        with open(file_path, "rb") as _:
-            pass
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Audio file not found.")
+        save_payload = {"task_id": task_id}
+        response = requests.get(f"{DATABASE_API_URL}/task/get_task", json=save_payload)
+
+        if response.status_code != 200:
+            logging.error(f"Error fetching tasks: {response.text}")
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+    
+        result = response.json()
+        result = result['result']
+        input_path_local = result['input_path_local']
+
+        if not input_path_local or not os.path.exists(input_path_local):
+            raise HTTPException(status_code=404, detail="Audio file not found.")
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error accessing file: {str(e)}")
 
     return StreamingResponse(
-        audio_stream(file_path),
-        media_type="audio/mpeg",  # Adjust based on file type
+        audio_stream(input_path_local),
+        media_type="audio/wav",  
     )
     
     
