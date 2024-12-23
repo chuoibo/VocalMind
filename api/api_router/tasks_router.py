@@ -31,18 +31,17 @@ async def get_tasks(user_name):
     return result['result']
 
 
-@router.get("/get_task/{user_name}/{task_id}")
-async def get_tasks(user_name: str,
-                    task_id: str):
+@router.get("/get_task/{task_id}")
+async def get_tasks_metadata(task_id: str):
     
-    logging.info(f'Start getting tasks from {user_name} ...')
+    logging.info(f'Start getting tasks {task_id} ...')
 
-    if not user_name or not task_id:
-        return JSONResponse({"error": "User_name and task_id must be provided."}, status_code=400)
+    if not task_id:
+        return JSONResponse({"error": "task_id must be provided."}, status_code=400)
 
 
-    save_payload = {"task_id": task_id, "user_id": user_name}
-    response = requests.get(f"{DATABASE_API_URL}/task/get_specific_task", json=save_payload)
+    save_payload = {"task_id": task_id}
+    response = requests.get(f"{DATABASE_API_URL}/task/get_task", json=save_payload)
 
     if response.status_code != 200:
         logging.error(f"Error fetching tasks: {response.text}")

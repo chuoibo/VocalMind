@@ -1,7 +1,8 @@
 import os
 import requests
+import asyncio
 
-from fastapi import APIRouter, UploadFile, HTTPException, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse, StreamingResponse
 from celery.result import AsyncResult
 from datetime import datetime
@@ -54,7 +55,7 @@ async def add_task(
         "speech_ai", args=[input_model], queue="speech_ai_queue"
     )
 
-    save_payload = {"task_id": task.id, "input_path": file_url, "time_sent": datetime.now().isoformat()}
+    save_payload = {"task_id": task.id, "input_path_remote": file_url, "time_sent": datetime.now().isoformat()}
     requests.post(f"{DATABASE_API_URL}/task/save", json=save_payload)
 
     logging.info('Finish adding speech task ...')
@@ -62,64 +63,55 @@ async def add_task(
     return {"task_id": task.id}
 
 
-@router.get("/check/{task_id}")
-async def get_task_result(task_id: str):
-    task_result = AsyncResult(task_id, app=celery_client)
-    if task_result.ready():
-        result = task_result.get()
-        result_data = result["result"]
-        output_path = result_data.get("generated_audio_file", None)
+@router.get("/stream-input")
+def stream_audio(file_path: str):
+    try:
+        with open(file_path, "rb") as _:
+            pass
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Audio file not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error accessing file: {str(e)}")
 
-        status_data = result['status']
-        status = status_data.get("status", None)
-        
-        update_payload = {"task_id": task_id, "status": status, "output_path": output_path}
-        requests.post(f"{DATABASE_API_URL}/task/update", json=update_payload)
-
-        return {
-            "task_id": task_id,
-            "status": task_result.status,
-            "result": task_result.get(),
-        }
-    else:
-        return {
-            "task_id": task_id,
-            "status": task_result.status,
-            "result": "Not ready",
-        }
-
-
-def audio_stream(audio_path):
-    with open(audio_path, "rb") as audio_file:
-        yield from audio_file
-
+    return StreamingResponse(
+        audio_stream(file_path),
+        media_type="audio/mpeg",  # Adjust based on file type
+    )
     
-@router.get("/stream/{task_id}")
+    
+@router.get("/stream-output/{task_id}")
 async def stream_task_result(task_id: str):
-    logging.info('Start streaming task result ...')
+    logging.info(f"Processing request for task_id: {task_id}")
 
     task_result = AsyncResult(task_id, app=celery_client)
-    if task_result.ready():
-        result = task_result.get()
-        result = result['result']
-        if "generated_audio_file" in result:
-            audio_path = result["generated_audio_file"]
-            logging.info(f'Result file path: {audio_path}')
 
-            if os.path.exists(audio_path):
-                return StreamingResponse(
-                    audio_stream(audio_path),
-                    media_type="audio/wav",
-                )
-            else:
-                raise HTTPException(
-                    status_code=404, detail="Audio file not found on the server."
-                )
-        else:
-            raise HTTPException(
-                status_code=400, detail="Task result does not contain an audio file."
-            )
-    else:
-        raise HTTPException(
-            status_code=202, detail="Task result is not ready yet. Please try again later."
+    await asyncio.sleep(3)
+
+    while not task_result.ready():
+        await asyncio.sleep(0.5) 
+
+    result = task_result.get()
+    result_data = result["result"]
+    output_path = result_data.get("generated_audio_file", None)
+
+    local_input_data = result['input']
+    inp = local_input_data.get("input", None)
+
+    status_data = result['status']
+    status = status_data.get("status", None)
+
+    update_payload = {"task_id": task_id, "status": status, "input_path_local": inp, "output_path": output_path}
+    requests.post(f"{DATABASE_API_URL}/task/update", json=update_payload)
+
+    if output_path and os.path.exists(output_path):
+        logging.info(f"Streaming audio file: {output_path}")
+        return StreamingResponse(
+            audio_stream(output_path),
+            media_type="audio/wav",
         )
+
+    return {
+        "task_id": task_id,
+        "status": 'Failed',
+        "result": None,
+    }

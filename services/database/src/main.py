@@ -49,12 +49,11 @@ def get_tasks(data: TaskGet):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/task/get_specific_task")
+@app.get("/task/get_task")
 def get_specific_task(data: TaskGet):
-    logging.info('Endpoint to get specific task by specific user in MongoDB.')
+    logging.info('Endpoint to get specific task in MongoDB.')
     try:
         result = speech_crud.get_task_metadata(
-            user_id=data.user_id,
             task_id=data.task_id
         )
         return {"message": f"Metadata of task {data.task_id} for {data.user_id} get succesfully", "result": result}
