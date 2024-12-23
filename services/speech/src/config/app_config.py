@@ -94,6 +94,5 @@ class Txt2SpeechConfig(Config):
     ref_audio_happy = tts_ref_cfg['ref_audio_happy']
     ref_audio_sympathy = tts_ref_cfg['ref_audio_sympathy']
     ref_audio_surprise = tts_ref_cfg['ref_audio_surprise']
-    ref_audio_anger = tts_ref_cfg['ref_audio_anger']
 
 

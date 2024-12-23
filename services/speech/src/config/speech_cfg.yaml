@@ -29,13 +29,12 @@ tts_ref:
   ref_audio_sad: /speech/common_dir/txt2speech/ref/sad.wav
   ref_audio_happy: /speech/common_dir/txt2speech/ref/happy.wav
   ref_audio_sympathy: /speech/common_dir/txt2speech/ref/sympathy.wav
-  ref_audio_anger: /speech/common_dir/txt2speech/ref/anger.wav
   ref_audio_surprise: /speech/common_dir/txt2speech/ref/surprise.wav
 
 
 txt2speech:
-  model_cache: /speech/common_dir/txt2speech/xtts_v2
-  model_config: /speech/common_dir/txt2speech/xtts_v2/config.json
+  model_cache: /speech/common_dir/txt2speech/models
+  model_config: /speech/common_dir/txt2speech/models/config.json
   output_file_path: /speech/common_dir/output/output.wav
   language: en
 

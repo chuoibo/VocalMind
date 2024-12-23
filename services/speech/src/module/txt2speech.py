@@ -25,15 +25,12 @@ class Txt2Speech:
         logging.info('Start mapping emotion with reference audio')
         if emotion == 'neutral':
             ref_audio = tc.ref_audio_neutral
-        elif emotion in ['sad', 'fear']:
+        elif emotion in ['sad', 'fear', 'anger']:
             ref_audio = tc.ref_audio_sympathy
         elif emotion == 'joy':
             ref_audio = tc.ref_audio_happy
-        elif emotion == 'anger':
-            ref_audio = tc.ref_audio_anger
         elif emotion == 'surprise':
             ref_audio = tc.ref_audio_surprise
-        
         return ref_audio
     
 

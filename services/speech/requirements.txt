@@ -4,7 +4,7 @@ pydantic==2.9.2
 python-dotenv==1.0.0
 transformers==4.46.2
 librosa==0.10.0
-webrtcvad-wheels
+webrtcvad
 pydub == 0.25.1
 onnx==1.14.1
 onnxruntime-gpu==1.18.0

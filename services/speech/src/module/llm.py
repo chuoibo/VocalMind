@@ -39,19 +39,12 @@ class TextGeneration:
 
         answer = answer.replace("\n", " ").strip()
         
-        last_newline_pos = answer.rfind("\n")
-        if last_newline_pos == -1: 
-            final_text = answer  
+        last_full_stop_pos = answer.rfind(".")
+        
+        if last_full_stop_pos != -1:
+            return answer[:last_full_stop_pos + 1].strip()
         else:
-            after_newline = answer[last_newline_pos + 1:]
-            last_full_stop_pos = after_newline.rfind(".")
-            if last_full_stop_pos != -1: 
-                final_text = answer[:last_newline_pos + 1] + after_newline[:last_full_stop_pos + 1]
-            else:  
-                final_text = answer[:last_newline_pos]
-
-        final_text = final_text.replace("\n", " ")
-        return final_text.strip()
+            return answer.strip()
 
 
     def run(self, input_text, emotion):
@@ -61,37 +54,37 @@ class TextGeneration:
 
         if emotion == 'sad':
             prompt = (
-                f"The user is feeling sad. Please respond the below input in a manner that aligns with their current emotional state and as short as possible."
+                f"The current emotional is sad. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'joy':
             prompt = (
-                f"The user is feeling happy. Respond the below input in an enthusiastic and celebratory manner to encourage their positivity and as short as possible."
+                f"The current emotional is happy. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'fear':
             prompt = (
-                f"The user is feeling happy. Respond the below input in an enthusiastic and celebratory manner to encourage their positivity and as short as possible."
+                f"The current emotional is fear. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'anger':
             prompt = (
-                f"The user is feeling angry. Respond the below input in a calm and understanding manner, acknowledging their feelings and helping them process their emotions constructively and as short as possible."
+                f"The current emotional is angry. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'surprise':
             prompt = (
-                f"The user is feeling surprised. Respond the below input in a curious and engaging manner to match their surprise and encourage them to share more about their experience and as short as possible."
+                f"The current emotional is surprised. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
         
         elif emotion == 'neutral':
             prompt = (
-                f"Respond the below input in an informative and balanced manner, maintaining a neutral and respectful tone and as short as possible"
+                f"The current emotional is neutral. Please respond the below input in a manner that aligns with their current emotional and as short as possible."
                 f"\n\nInput: {input_text}\nResponse:"
             )
 
@@ -107,6 +100,8 @@ class TextGeneration:
 
         answer = self.tokenizer.decode(output[0])
         end_time = time.time()
+
+        logging.info(f'Text before preprocessing: {answer}')
 
         processed_answer = self.postprocess_text(answer)
         
