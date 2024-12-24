@@ -2,7 +2,7 @@
 
 **VocalMind** is a Speech AI module application that adapts to user emotions for natural, empathetic communication. It analyzes emotions, adjusts speech tone, and responds with answers that match the user's feelings, creating a human-like conversational experience.
 
-## 🚀 System Pipline
+## System Pipline
 
 ![Speech1](https://github.com/user-attachments/assets/8047cda6-2dec-4561-a6d5-294255ea8141)
 
@@ -13,7 +13,7 @@ This pipeline consists of four key modules. Each module plays a crucial role in 
 - Text-to-speech
 
 
-###  Speech to Text
+### Speech to Text
 The speech-to-text module utilizes [Wav2Vec2](https://huggingface.co/facebook/wav2vec2-large-960h-lv60) for speech recognition, combined with the spelling correction model [oliverguhr/spelling-correction-english-base](https://huggingface.co/oliverguhr/spelling-correction-english-base) to enhance accuracy.
 
 - For live recording, voice activity detection powered by `WebRTC VAD` runs concurrently with speech recognition and spelling correction.
@@ -45,7 +45,7 @@ For the text generation module, we use [Llama 3.2 1B](https://huggingface.co/met
 
 By tailoring prompts for each emotion, the model produces appropriate and thoughtful responses, creating a more personalized and engaging interaction.
 
-### Text to Speech
+### 💡 Text to Speech
 
 
 For the text-to-speech module, instead of directly generating speech with emotion, I propose using voice cloning for emotional tones. This approach provides fast inference and accurate imitation of emotional tones such as happy, sympathetic, sad, or surprised. The model used for this module is [xTTSv2](https://huggingface.co/coqui/XTTS-v2) by coqui.
