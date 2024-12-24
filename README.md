@@ -61,7 +61,37 @@ This mapping ensures the synthesized speech aligns with the user's emotional sta
 
 ### Demonstration
 
+## System Architecture
 
+This system is designed using a microservices architecture, where the Speech Service and the Database Service communicate with each other through APIs (implemented with FastAPI). The system accepts two types of input: live audio recordings or an audio file provided via its file path.
+
+![architecture](https://github.com/user-attachments/assets/07fe40b7-c649-4662-bc31-310b9174dc66)
+
+### Input (Client to FastAPI):
+- **Live Recording**: The client can record audio live, which is sent directly to **FastAPI**.
+- **Audio File Path**: The client can provide an audio file path. The **FastAPI** service uploads this file to an **S3 bucket** (`1.1* Uploading Audio File Path`).
+
+### 1. Task Enqueueing (FastAPI to RabbitMQ):
+- Once the input (live or file path) is received, **FastAPI** enqueues the task into RabbitMQ (`2.1 Enqueue Task`).
+- **RabbitMQ** returns a task ID or relevant task information to **FastAPI** (`2.3 Return task IO`).
+
+### 2. File Retrieval and Task Execution:
+- For file-based tasks, the Celery Worker retrieves the audio file from the **S3 bucket** (`3.1* Query File from Bucket`).
+- The task is then started by **RabbitMQ**, and it is picked up by a **Celery Worker**, specifically the **Speech Worker** (`3. START TASK`).
+
+### 3. Processing and Status Storage:
+- The **Speech Worker** processes the task using the **Speech Module** for operations
+- Task status and results are stored in Redis for quick access (`4. Store Task Status`).
+
+### 4. Task Status Querying:
+- **RabbitMQ** interacts with **Redis** to fetch the task status when queried by **FastAPI** (`5. Query Task Status`).
+
+### 5. Metadata Management (FastAPI to Database):
+- Before processing begins, **FastAPI** updates the **Database** with initial metadata, such as task ID, input type, and timestamps (`2.2 Update Initial Metadata`).
+- During or after processing, **FastAPI** retrieves task results or status from **Redis** and updates the **Database** with the final metadata and results (`7. Update Metadata`).
+
+### Output:
+- **FastAPI** sends the task results or status back to the Client as output (`8. Output`).
 
 
 ## Installation
