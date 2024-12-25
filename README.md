@@ -2,7 +2,7 @@
 
 **VocalMind** is a Speech AI module application that adapts to user emotions for natural, empathetic communication. It analyzes emotions, adjusts speech tone, and responds with answers that match the user's feelings, creating a human-like conversational experience.
 
-## System Pipline
+## 💡 Speech Module Pipline
 
 ![Speech1](https://github.com/user-attachments/assets/8047cda6-2dec-4561-a6d5-294255ea8141)
 
@@ -45,7 +45,7 @@ For the text generation module, we use [Llama 3.2 1B](https://huggingface.co/met
 
 By tailoring prompts for each emotion, the model produces appropriate and thoughtful responses, creating a more personalized and engaging interaction.
 
-### 💡 Text to Speech
+### Text to Speech
 
 
 For the text-to-speech module, instead of directly generating speech with emotion, I propose using voice cloning for emotional tones. This approach provides fast inference and accurate imitation of emotional tones such as happy, sympathetic, sad, or surprised. The model used for this module is [xTTSv2](https://huggingface.co/coqui/XTTS-v2) by coqui.
@@ -94,7 +94,7 @@ This system is designed using a microservices architecture, where the Speech Ser
 - **FastAPI** sends the task results or status back to the Client as output (`8. Output`).
 
 
-## 🎸 Installation
+## 📦 Installation
 
 To install the necessary dependencies for each service, please follow the specific criteria and execute the corresponding commands below.
 
@@ -106,11 +106,11 @@ pip install -r services/database/requirements.txt
 
 Ensure that [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/), [cuDNN](https://docs.nvidia.com/deeplearning/cudnn/latest/installation/linux.html), [Docker Engine](https://docs.docker.com/engine/install/ubuntu/), and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) are installed, as these are the highest prerequisites.
 
-## 🥁 Inference
+## 🤖 Inference
 
 Certain prerequisites must be prepared before running inference.
 
-### ⚡ Common Directory
+### 🛠️ Common Directory
 
 Follow the descriptions of each module in the system pipeline to download the required models and organize them according to the specified structure below. For modules supporting `ONNX`, convert the models to `ONNX` format and place them in the correct directories as indicated.
 
@@ -158,7 +158,9 @@ Follow the descriptions of each module in the system pipeline to download the re
 ```
 
 
-### 🔥 Environments File
+For the reference emotion audio file paths, please organize, store, and rename the files according to the proposed structure. The dataset containing the emotion reference file paths can be found [HERE](https://github.com/HLTSingapore/Emotional-Speech-Data).
+
+### 💻 Environments File
 
 Create a `.env` file using the sample template below and place it in the appropriate directories for each `api`, `database`, and `speech` service:
 
@@ -193,7 +195,7 @@ DATABASE_URL=mongodb://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOSTNAME
 
 If you don’t yet have an S3 bucket on AWS for storage, please register for one and obtain the necessary access keys for the AWS bucket.
 
-### 🌟 QUICK START
+### ▶️ QUICK START
 
 Here's a basic command line to run:
 
