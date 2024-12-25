@@ -18,30 +18,27 @@ class SpeechCRUD:
         return user_doc["tasks"]
 
     
-    def get_task_metadata(self, task_id):
-        logging.info("Get task metadata by task_id")
+    def get_task_metadata(self, user_id, task_id):
+        logging.info("Get specific task for specific user")
         collection = self.database_instance.get_collection()
-
-        task_doc = collection.find_one(
-            {"tasks.task_id": task_id},
+        user_doc = collection.find_one(
+            {"user_id": user_id, "tasks.task_id": task_id},
             {"_id": 0, "tasks.$": 1}
         )
-
-        if not task_doc or not task_doc.get("tasks"):
+        if not user_doc or not user_doc.get("tasks"):
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Task not found")
-
-        return task_doc["tasks"][0]
+        return user_doc["tasks"][0]
     
 
-    def save_task_metadata(self, user_id, task_id, input_path_remote, time_sent):
+    def save_task_metadata(self, user_id, task_id, input_path_remote,  time_sent):
         logging.info("Save initial task metadata.")
         collection = self.database_instance.get_collection()
         
         task = {
             "task_id": task_id,
             "status": "pending",
-            "input_path_remote": input_path_remote,
             "input_path_local": None,
+            "input_path_remote": input_path_remote,
             "output_path": None,
             "time_sent": time_sent
         }
@@ -61,10 +58,10 @@ class SpeechCRUD:
         update_fields = {}
         if status:
             update_fields["tasks.$.status"] = status
-        if input_path_local:
-            update_fields["tasks.$.input_path_local"] = input_path_local
         if output_path:
             update_fields["tasks.$.output_path"] = output_path
+        if input_path_local:
+            update_fields["tasks.$.input_path_local"] = input_path_local
 
         result = collection.update_one(
             {"tasks.task_id": task_id}, 

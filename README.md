@@ -211,4 +211,3 @@ bash script/dev-full.sh rebuild
 You can monitor the speech tasks using Flower by opening `localhost:5555`. To interact with FastAPI for sending and receiving tasks, open `localhost:8081/docs`.
 
 
-
