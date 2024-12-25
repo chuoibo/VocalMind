@@ -34,8 +34,8 @@ tts_ref:
 
 
 txt2speech:
-  model_cache: /speech/common_dir/txt2speech/xtts_v2
-  model_config: /speech/common_dir/txt2speech/xtts_v2/config.json
+  model_cache: /speech/common_dir/txt2speech/models
+  model_config: /speech/common_dir/txt2speech/models/config.json
   output_file_path: /speech/common_dir/output/output.wav
   language: en
 

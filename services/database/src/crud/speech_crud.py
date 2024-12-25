@@ -30,14 +30,15 @@ class SpeechCRUD:
         return user_doc["tasks"][0]
     
 
-    def save_task_metadata(self, user_id, task_id, input_path, time_sent):
+    def save_task_metadata(self, user_id, task_id, input_path_remote,  time_sent):
         logging.info("Save initial task metadata.")
         collection = self.database_instance.get_collection()
         
         task = {
             "task_id": task_id,
             "status": "pending",
-            "input_path": input_path,
+            "input_path_local": None,
+            "input_path_remote": input_path_remote,
             "output_path": None,
             "time_sent": time_sent
         }
@@ -49,7 +50,7 @@ class SpeechCRUD:
         )
 
 
-    def update_task_metadata(self, task_id, status, output_path=None):
+    def update_task_metadata(self, task_id, status, input_path_local, output_path=None):
         logging.info("Update task status and output path.")
 
         collection = self.database_instance.get_collection()
@@ -59,6 +60,8 @@ class SpeechCRUD:
             update_fields["tasks.$.status"] = status
         if output_path:
             update_fields["tasks.$.output_path"] = output_path
+        if input_path_local:
+            update_fields["tasks.$.input_path_local"] = input_path_local
 
         result = collection.update_one(
             {"tasks.task_id": task_id}, 

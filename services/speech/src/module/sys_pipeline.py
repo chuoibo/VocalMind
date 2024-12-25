@@ -23,6 +23,11 @@ class SpeechSystem:
         self.live_record = inp.live_record
         self.input_audio_file_path = inp.input_audio_file_path
 
+        if self.live_record:
+            self.system_input = 'live_recording'
+        else:
+            self.system_input = self.input_audio_file_path
+
         with ThreadPoolExecutor() as executor:
             future_text_generation = executor.submit(
                 lambda: TEXT_GENERATION_INIT or TextGeneration()
@@ -81,6 +86,7 @@ class SpeechSystem:
             status = StatusModel(status=StatusEnum.failure, message=str(e))
         
         return OutputSpeechSystemModel(
+            input=self.system_input,
             result=result,
             status=status
         )

@@ -15,7 +15,7 @@ def save_task(data: TaskMetadata):
         speech_crud.save_task_metadata(
             user_id=data.user_id,
             task_id=data.task_id,
-            input_path=data.input_path,
+            input_path_remote=data.input_path_remote,
             time_sent=data.time_sent,
         )
         return {"message": "Task metadata saved successfully."}
@@ -31,6 +31,7 @@ def update_task(data: TaskUpdate):
             task_id=data.task_id,
             status=data.status,
             output_path=data.output_path,
+            input_path_local=data.input_path_local
         )
         return {"message": "Task metadata updated successfully."}
     except Exception as e:

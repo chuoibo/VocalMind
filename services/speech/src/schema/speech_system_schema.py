@@ -18,5 +18,6 @@ class StatusModel(BaseModel):
     message: Optional[str] = None
 
 class OutputSpeechSystemModel(BaseModel):
+    input: StrictStr
     result: ResultSpeechSystemModel
     status: StatusModel
