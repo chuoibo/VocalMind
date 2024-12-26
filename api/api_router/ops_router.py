@@ -85,6 +85,8 @@ def stream_audio(user_id: str, task_id: str, background_tasks: BackgroundTasks):
             logging.error(f"Error fetching tasks: {response.text}")
             raise HTTPException(status_code=response.status_code, detail=response.text)
         
+        logging.info
+        
         result = response.json()
         result = result['result']
         input_path_remote = result['input_path_remote']
@@ -120,8 +122,6 @@ async def stream_task_result(task_id: str):
     logging.info(f"Processing request for task_id: {task_id}")
 
     task_result = AsyncResult(task_id, app=celery_client)
-
-    await asyncio.sleep(3)
 
     while not task_result.ready():
         await asyncio.sleep(0.5) 

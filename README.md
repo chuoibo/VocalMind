@@ -61,6 +61,12 @@ This mapping ensures the synthesized speech aligns with the user's emotional sta
 
 ## 🎼 Demonstration
 
+https://github.com/user-attachments/assets/a8c98154-7e9f-4a44-9361-e6e9dc0c9e87
+
+- add_task: Accepts live audio recording or an audio file input path and returns a unique task ID.
+- stream_input: Streams the provided audio file input if an audio file is selected.
+- stream_output: Streams the generated speech with emotion.
+
 ## 🎷 System Architecture
 
 This system is designed using a microservices architecture, where the Speech Service and the Database Service communicate with each other through APIs (implemented with FastAPI). The system accepts two types of input: live audio recordings or an audio file provided via its file path.
