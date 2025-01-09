@@ -74,3 +74,10 @@ def save_json(data, file_path, indent=4):
 def find_files(directory_path, type_file):
     directory = Path(directory_path)
     return list(directory.rglob(f"*.{type_file}"))
+
+
+def save_txt(file_name: str, content: str) -> None:
+    with open(file_name, 'w') as file:
+        file.write(content)
+    logging.info(f"String successfully saved to {file_name}")
+

@@ -9,41 +9,41 @@ from src.celery_tasks.app_worker import app
 
 
 @app.task(name='speech_ai')
-def speech_ai(input_data):
-    live_record = input_data.get("live_record")
-    input_audio_file_path = input_data.get("input_audio_file_path")
+def speech_ai(audio_chunk):
+    # live_record = input_data.get("live_record")
+    # input_audio_file_path = input_data.get("input_audio_file_path")
     
-    if live_record:
-        inp = InputSpeechSystemModel(
-            live_record=live_record,
-            input_audio_file_path=None
-        )
+    # if live_record:
+    inp = InputSpeechSystemModel(
+        live_record=True,
+        input_audio_file_path=None
+    )
     
-    else:
-        file_url = input_audio_file_path
-        try:
-            logging.info(f"Downloading audio file from {file_url}...")
-            response = requests.get(file_url)
+    # else:
+    #     file_url = input_audio_file_path
+    #     try:
+    #         logging.info(f"Downloading audio file from {file_url}...")
+    #         response = requests.get(file_url)
 
-            if response.status_code != 200:
-                raise Exception(f"Failed to download file from {file_url}")
+    #         if response.status_code != 200:
+    #             raise Exception(f"Failed to download file from {file_url}")
 
-            local_file_path = f"./common/input/{uuid.uuid4()}_input_audio.wav"
-            os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+    #         local_file_path = f"./common/input/{uuid.uuid4()}_input_audio.wav"
+    #         os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
             
-            with open(local_file_path, "wb") as f:
-                f.write(response.content)
+    #         with open(local_file_path, "wb") as f:
+    #             f.write(response.content)
             
-            logging.info(f"Audio file saved to {local_file_path}")
+    #         logging.info(f"Audio file saved to {local_file_path}")
 
-            inp = InputSpeechSystemModel(
-                live_record=live_record,
-                input_audio_file_path=local_file_path
-            )
+    #         inp = InputSpeechSystemModel(
+    #             live_record=live_record,
+    #             input_audio_file_path=local_file_path
+    #         )
 
-        except Exception as e:
-            logging.error(f"Error downloading or saving file: {e}")
-            raise e
+    #     except Exception as e:
+    #         logging.error(f"Error downloading or saving file: {e}")
+    #         raise e
         
     result = SpeechSystem(inp=inp).run()
     logging.info('Implementing speech task...')

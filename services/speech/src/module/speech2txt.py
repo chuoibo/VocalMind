@@ -48,6 +48,23 @@ class VADProcessor:
                     0, i).get('name')
                 result += [[i, name]]
         return result
+    
+    
+    def process_audio_chunk(self, audio_chunk):
+        """Process a single audio chunk."""
+        try:
+            # Convert audio chunk to float format
+            float64_buffer = np.frombuffer(audio_chunk, dtype=np.int16) / 32767
+            text = self.wav2vec2.speech_recognition(float64_buffer).lower()
+
+            if text:
+                corrected_text = self.txt_processing.text_post_processing(text)
+                logging.info(f"Recognized Text: {corrected_text}")
+                return corrected_text
+            return ""
+        except Exception as e:
+            logging.error(f"Error processing audio chunk: {e}")
+            return ""
 
 
     def process_stream(self, asr_input_queue):

@@ -3,7 +3,14 @@ import requests
 import asyncio
 import uuid
 
-from fastapi import APIRouter, UploadFile, HTTPException, File, Form
+from fastapi import (APIRouter, 
+                     UploadFile, 
+                     HTTPException, 
+                     WebSocket, 
+                     WebSocketDisconnect, 
+                     File, 
+                     Form)
+
 from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.background import BackgroundTasks
 from celery.result import AsyncResult
@@ -13,9 +20,40 @@ from utils import DATABASE_API_URL
 from aws_client import upload_to_s3
 from worker import celery_client
 from utils.api_logger import logging
-from utils.common import audio_stream, delete_file
+from utils.common import audio_stream, delete_file, text_stream
 
 router = APIRouter(prefix="/ops", tags=["Tasks Operations"])
+
+
+@router.websocket("/ws/audio")
+async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for real-time audio streaming."""
+    await websocket.accept()
+    buffer = b"" 
+    buffer_chunk_size = 3200  
+
+    try:
+        while True:
+            audio_chunk = await websocket.receive_bytes()
+            buffer += audio_chunk 
+
+            if len(buffer) >= buffer_chunk_size:
+                celery_client.send_task(
+                    "speech_ai",
+                    args=[buffer],  
+                    queue="speech_ai_queue",
+                )
+                buffer = b"" 
+    except WebSocketDisconnect:
+        logging.info("WebSocket connection closed.")
+
+        if buffer:
+            celery_client.send_task(
+                "speech_ai",
+                args=[buffer],  
+                queue="speech_ai_queue",
+            )
+
 
 @router.post("/add")
 async def add_task(
@@ -141,8 +179,8 @@ async def stream_task_result(task_id: str):
     if output_path and os.path.exists(output_path):
         logging.info(f"Streaming audio file: {output_path}")
         return StreamingResponse(
-            audio_stream(output_path),
-            media_type="audio/wav",
+            text_stream(output_path),
+            media_type="text/plain",
         )
 
     return {

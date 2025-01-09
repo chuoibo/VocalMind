@@ -12,3 +12,8 @@ def delete_file(file_path):
             logging.info(f"Deleted temporary file: {file_path}")
     except Exception as e:
         logging.error(f"Failed to delete temporary file {file_path}: {str(e)}")
+
+def text_stream(file_path):
+    with open(file_path, "r") as file:
+        for line in file:
+            yield line
