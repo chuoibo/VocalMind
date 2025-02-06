@@ -14,6 +14,8 @@ services:
       - ./api:/app
       - ./logs:/api/logs
       - ./services/common_dir:/speech/common_dir
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
     environment:
       - MQ_URL=${MQ_URL}
       - REDIS_URL=${REDIS_URL}
@@ -23,6 +25,9 @@ services:
       - DATABASE_API_URL=${DATABASE_API_URL} 
       - HOST=0.0.0.0
       - PORT=8081
+      - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
+    devices:
+      - /dev/snd:/dev/snd 
     networks:
       - vnet
     command: uvicorn api:app --host 0.0.0.0 --port 8081
@@ -40,17 +45,17 @@ services:
       - RMQ_USER=${RMQ_USER}
       - RMQ_PWD=${RMQ_PWD}
       - REDIS_PWD=${REDIS_PWD}
-      - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
+      # - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
     volumes:
       - ./services/speech/src:/speech/src
       - ./logs:/speech/logs
       - ./services/common_dir:/speech/common_dir
-      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
-      - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
+      # - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      # - ~/.config/pulse/cookie:/root/.config/pulse/cookie  
     networks:
       - vnet
-    devices:
-      - /dev/snd:/dev/snd 
+    # devices:
+    #   - /dev/snd:/dev/snd 
     privileged: true
     
     deploy:

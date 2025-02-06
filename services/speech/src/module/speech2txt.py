@@ -150,10 +150,9 @@ class Speech2Txt:
     """Main Speech-to-Text Pipeline."""
     exit_event = threading.Event()
 
-    def __init__(self, live_record, input_audio_file_path):
+    def __init__(self, input_audio_file_path):
         global WAV2VEC2_INIT, TEXT_PROCESSING_INIT
 
-        self.live_record = live_record
         self.input_audio_file_path = input_audio_file_path
         self.device_name = sc.device_name
         self.asr_output_queue = Queue()
@@ -182,16 +181,18 @@ class Speech2Txt:
     def start(self):
         """Start the Speech-to-Text process."""
         logging.info("Starting Speech-to-Text process...")
-        if self.live_record:
-            self.vad_thread = threading.Thread(
-                target=self.vad_processor.process_stream,
-                args=(self.device_name, self.asr_input_queue),
-            )
-        else:
-            self.vad_thread = threading.Thread(
-                target=self.vad_processor.process_file,
-                args=(self.input_audio_file_path, self.asr_input_queue),
-            )
+        
+        # if self.live_record:
+        #     self.vad_thread = threading.Thread(
+        #         target=self.vad_processor.process_stream,
+        #         args=(self.device_name, self.asr_input_queue),
+        #     )
+        # else:
+
+        self.vad_thread = threading.Thread(
+            target=self.vad_processor.process_file,
+            args=(self.input_audio_file_path, self.asr_input_queue),
+        )
         self.vad_thread.start()
 
         self.asr_thread = threading.Thread(

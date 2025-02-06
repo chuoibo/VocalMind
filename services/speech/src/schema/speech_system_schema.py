@@ -7,11 +7,10 @@ class StatusEnum(str, Enum):
     failure = "failure"
 
 class InputSpeechSystemModel(BaseModel):
-    live_record: bool
     input_audio_file_path: Optional[StrictStr]
 
 class ResultSpeechSystemModel(BaseModel):
-    generated_audio_file: StrictStr
+    generated_audio_file: Optional[StrictStr]
 
 class StatusModel(BaseModel):
     status: StatusEnum

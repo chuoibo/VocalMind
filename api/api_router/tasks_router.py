@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from utils.api_logger import logging
-from utils import DATABASE_API_URL
+from config.app_config import Config as cfg
 
 router = APIRouter(prefix="/metadata", tags=["Metadata"])
 
@@ -18,7 +18,7 @@ async def get_tasks(user_name):
 
 
     save_payload = {"task_id": None, "user_id": user_name}
-    response = requests.get(f"{DATABASE_API_URL}/task/get_by_user", json=save_payload)
+    response = requests.get(f"{cfg.DATABASE_API_URL}/task/get_by_user", json=save_payload)
 
     if response.status_code != 200:
         logging.error(f"Error fetching tasks: {response.text}")
@@ -41,7 +41,7 @@ async def get_tasks_metadata(task_id: str):
 
 
     save_payload = {"task_id": task_id}
-    response = requests.get(f"{DATABASE_API_URL}/task/get_task", json=save_payload)
+    response = requests.get(f"{cfg.DATABASE_API_URL}/task/get_task", json=save_payload)
 
     if response.status_code != 200:
         logging.error(f"Error fetching tasks: {response.text}")
