@@ -54,7 +54,7 @@ class EmotionAnalysis:
         elif self.model_type == 'onnx':
             inputs = self.processor(
                 input_text,
-                return_tensors=self.return_tensors,  # Return numpy arrays for ONNX compatibility
+                return_tensors=self.return_tensors,  
                 padding=self.padding,
                 truncation=self.truncation,
                 max_length=self.max_length

@@ -7,9 +7,6 @@ load_dotenv()
 
 
 class Config:
-    DEBUG = False
-    TESTING = False
-
     # RabbitMQ Configuration
     RMQ_USER = os.getenv('RMQ_USER', 'guest')
     RMQ_PWD = os.getenv('RMQ_PWD', 'guest')
